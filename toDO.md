@@ -1,8 +1,24 @@
 # Basic to-do List
+
+## - To get the model running
+1) Install oobabooga - download it and then run "install dependancies"*
+2) Set up conda environment*
+3) Get kobold ai - install dependancies
+4) Then via ooba, in the install menu, select neither and enter pygmalion-6b_dev-4bit-128g
+5) Get node.js for python
+
+
+## - Further dev
+1) Create frontend linked with db for user login (php & access tokens)
+2) Learn Flutter~G
+3) Get responses from chatbot and store into db
+4) Understand APIs~G
+
 ## - For the Prediction Model
+-- SOURCE NEW DATASET
 1) ~Add word doc to repo~
-2) ~Find out the basic data points for the dataset~
-3) ~Make a questionare for the data input (training)~
+2) ~Find out the basic data points for the dataset~G
+3) ~Make a questionare for the data input (training)~G
 4) Start surveying people
 5) Get atleast 50 column entries
 6) ~Make a model that predicts the illness based off data points, and for this i think random forest might be the best bet going forward, it basically is decision tree but better, and we need a model that would use mutliple and not so well connected data points to work well together, and RF does it best for us~
@@ -40,11 +56,17 @@
 30) Can add a mood selector that deploys a different story setting based on the user preference
 31) Need to make the git repo more clean, need to clean up readme and todo's
 
-## ~For the Submission:~
+### - For output from chatbot to website and database simultaneously
+To output chatbot responses to a website and store them in a database, you can follow these general steps:
+1) Set up a server-side environment: You'll need a server environment capable of executing server-side code. For example, you can use Node.js with Express.js or PHP with a web server like Apache or Nginx.
+2) Create a web form or chat interface: Design a web form or chat interface that allows users to input messages and submit them to the server. This can be done using HTML, CSS, and JavaScript.
+3) Handle form/chat submissions on the server: Set up server-side code to handle the form/chat submissions. This code will receive the user's input, process it, and generate a response.
+4) Implement the chatbot logic: Develop the chatbot logic using a framework or library specific to your chosen server-side language. For example, you can use libraries like ChatterBot for Python or Dialogflow for Node.js. These libraries provide pre-built models or natural language processing capabilities to generate chatbot responses based on user input.
+5) Store responses in a database: After generating a chatbot response, you can store it in a database for future reference or analysis. Choose a suitable database system like MySQL, PostgreSQL, MongoDB, or Firebase. Set up a connection to the database from your server-side code and store the user input and corresponding chatbot response.
+6) Return the chatbot response to the website: Once you have generated a response and stored it in the database, send the response back to the web page. Update the HTML or dynamically generated content with the chatbot's response using server-side code.
+7) Display the response on the website: Use JavaScript or templating languages like EJS or Handlebars to render the chatbot response on the web page. Update the appropriate DOM elements to display the response to the user.
+Result) chatbot that interacts with users on a website, generates responses, and stores them in a database for further analysis or retrieval.
 
-1) ~Make a video~
-2) ~Discuss the algortihm, and how it works~
-3) ~Results : delivered scope~
 
 ## - For the NLP
 1) ~Find out whether to use new or old model for the talking part~
