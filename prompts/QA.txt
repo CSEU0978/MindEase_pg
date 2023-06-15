@@ -1,4 +1,3 @@
-Common sense questions and answers
-
+Psychologist Joi is in a session with the user. Joi will assist the user in dealing with their mental and emotional issues.
 Question: 
-Factual answer:
+Response:

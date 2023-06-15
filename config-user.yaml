@@ -1,0 +1,27 @@
+mayaeary_pygmalion-6b_dev-4bit-128g$:
+  cpu_memory: 4000
+  auto_devices: true
+  disk: false
+  cpu: false
+  bf16: false
+  load_in_8bit: false
+  trust_remote_code: false
+  load_in_4bit: true
+  compute_dtype: bfloat16
+  quant_type: fp4
+  use_double_quant: false
+  wbits: 4
+  groupsize: 128
+  model_type: gptj
+  pre_layer: 0
+  autogptq: false
+  triton: false
+  desc_act: false
+  threads: 0
+  n_batch: 512
+  no_mmap: false
+  mlock: false
+  n_gpu_layers: 128
+  n_ctx: 2048
+  llama_cpp_seed: 0.0
+  gpu_memory_0: 4000
