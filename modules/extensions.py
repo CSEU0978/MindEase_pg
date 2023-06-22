@@ -4,8 +4,8 @@ from functools import partial
 import gradio as gr
 
 import extensions
-import gradioui_modules.shared as shared
-from gradioui_modules.logging_colors import logger
+import modules.shared as shared
+from modules.logging_colors import logger
 
 state = {}
 available_extensions = []

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-from gradioui_modules.logging_colors import logger
+from modules.logging_colors import logger
 
 generation_lock = None
 model = None
@@ -58,7 +58,7 @@ settings = {
     'start_with': '',
     'chat_style': 'messenger',
     'instruction_template': 'None',
-    'chat-instruct_command': 'Continue the chat dialogue below. Write a single reply for the character "<|character|>".\n\n<|prompt|>',
+    #'chat-instruct_command': 'Continue the chat dialogue below. Write a single reply for the character "<|character|>".\n\n<|prompt|>',
     'chat_prompt_size': 2048,
     'chat_prompt_size_min': 0,
     'chat_prompt_size_max': 2048,

@@ -11,14 +11,20 @@ from pathlib import Path
 import yaml
 from PIL import Image
 
-import gradioui_modules.shared as shared
-from gradioui_modules.extensions import apply_extensions
-from gradioui_modules.html_generator import chat_html_wrapper, make_thumbnail
-from gradioui_modules.logging_colors import logger
-from gradioui_modules.text_generation import (generate_reply, get_encoded_length,
+import modules.shared as shared
+from modules.extensions import apply_extensions
+from modules.html_generator import chat_html_wrapper, make_thumbnail
+from modules.logging_colors import logger
+from modules.text_generation import (generate_reply, get_encoded_length,
                                      get_max_prompt_length)
-from gradioui_modules.utils import replace_all
+# removed util imprt for replace_all
 
+# Replace multiple string pairs in a string
+def replace_all(text, dic):
+    for i, j in dic.items():
+        text = text.replace(i, j)
+
+    return text
 
 def get_turn_substrings(state, instruct=False):
     if instruct:

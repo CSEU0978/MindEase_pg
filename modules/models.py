@@ -9,15 +9,14 @@ from pathlib import Path
 import numpy as np
 import torch
 import transformers
-import infer_auto_device_map #from accelerate
-import init_empty_weights #from accelerate
+from accelerate import infer_auto_device_map, init_empty_weights
 from transformers import (AutoConfig, AutoModel, AutoModelForCausalLM,
                           AutoModelForSeq2SeqLM, AutoTokenizer,
                           BitsAndBytesConfig, LlamaTokenizer)
 
-import gradioui_modules.shared as shared
-from gradioui_modules import llama_attn_hijack, sampler_hijack #DOUBLE CHECK THESE FILES 
-from gradioui_modules.logging_colors import logger # to differentiate input and output/ bot and user
+import modules.shared as shared
+from modules import llama_attn_hijack, sampler_hijack #DOUBLE CHECK THESE FILES 
+from modules.logging_colors import logger # to differentiate input and output/ bot and user
 
 transformers.logging.set_verbosity_error()
 
@@ -69,14 +68,12 @@ def load_model(model_name):
         logger.error('The path to the model does not exist. Exiting.')
         return None, None
 
-    if shared.args.autogptq:
-        load_func = AutoGPTQ_loader
-    elif shared.args.wbits > 0:
+    # removed if shared.args.autogptq:
+    if shared.args.wbits > 0:
         load_func = GPTQ_loader
     elif shared.model_type == 'llamacpp':
         load_func = llamacpp_loader
-    elif shared.model_type == 'rwkv':
-        load_func = RWKV_loader
+    # removed elif shared.model_type == 'rwkv':
     elif shared.args.flexgen:
         load_func = flexgen_loader
     else:
@@ -98,7 +95,6 @@ def load_model(model_name):
 
     logger.info(f"Loaded the model in {(time.time()-t0):.2f} seconds.\n")
     return model, tokenizer
-
 
 def load_tokenizer(model_name, model):
     tokenizer = None
@@ -141,11 +137,8 @@ def huggingface_loader(model_name):
     # Load the model in simple 16-bit mode by default
     if not any([shared.args.cpu, shared.args.load_in_8bit, shared.args.load_in_4bit, shared.args.auto_devices, shared.args.disk, shared.args.deepspeed, shared.args.gpu_memory is not None, shared.args.cpu_memory is not None]):
         model = LoaderClass.from_pretrained(Path(f"{shared.args.model_dir}/{model_name}"), low_cpu_mem_usage=True, torch_dtype=torch.bfloat16 if shared.args.bf16 else torch.float16, trust_remote_code=shared.args.trust_remote_code)
-        if torch.has_mps:
-            device = torch.device('mps')
-            model = model.to(device)
-        else:
-            model = model.cuda()
+        # removed if torch.has_mps: as mps is support related to mac and apple architectures - support is unrelated for now
+        model = model.cuda()
 
     # removed elif shared.args. deepspeed for DeepSpeed ZeRO-3
 
@@ -202,7 +195,7 @@ def huggingface_loader(model_name):
                 model,
                 dtype=torch.int8,
                 max_memory=params['max_memory'],
-                no_split_module_classes=model._no_split_gradioui_modules
+                no_split_module_classes=model._no_split_modules
             )
 
         model = LoaderClass.from_pretrained(checkpoint, **params)
@@ -235,17 +228,10 @@ def flexgen_loader(model_name):
     model = OptLM(f"facebook/{model_name}", env, shared.args.model_dir, policy)
     return model
 
-
-def RWKV_loader(model_name):
-    from gradioui_modules.RWKV import RWKVModel, RWKVTokenizer
-
-    model = RWKVModel.from_pretrained(Path(f'{shared.args.model_dir}/{model_name}'), dtype="fp32" if shared.args.cpu else "bf16" if shared.args.bf16 else "fp16", device="cpu" if shared.args.cpu else "cuda")
-    tokenizer = RWKVTokenizer.from_pretrained(Path(shared.args.model_dir))
-    return model, tokenizer
-
+# removed RWKV_loader(model_name):
 
 def llamacpp_loader(model_name):
-    from gradioui_modules.llamacpp_model import LlamaCppModel
+    from modules.llamacpp_model import LlamaCppModel
 
     path = Path(f'{shared.args.model_dir}/{model_name}')
     if path.is_file():
@@ -260,27 +246,13 @@ def llamacpp_loader(model_name):
 
 def GPTQ_loader(model_name):
 
-    # Monkey patch
-    if shared.args.monkey_patch:
-        logger.warning("Applying the monkey patch for using LoRAs with GPTQ models. It may cause undefined behavior outside its intended scope.")
-        from gradioui_modules.monkey_patch_gptq_lora import load_model_llama
-
-        model, _ = load_model_llama(model_name)
-
-    # No monkey patch
-    else:
-        import gradioui_modules.GPTQ_loader
-
-        model = gradioui_modules.GPTQ_loader.load_quantized(model_name)
+    # removed the Monkey patch for loading LoRAs for GPTQ
+    import modules.GPTQ_loader
+    model = modules.GPTQ_loader.load_quantized(model_name)
 
     return model
 
-
-def AutoGPTQ_loader(model_name):
-    import gradioui_modules.AutoGPTQ_loader
-
-    return gradioui_modules.AutoGPTQ_loader.load_quantized(model_name)
-
+# removed AutoGPTQ_loader(model_name):
 
 def get_max_memory_dict():
     max_memory = {}
