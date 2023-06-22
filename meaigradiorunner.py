@@ -380,7 +380,7 @@ if __name__ == "__main__":
         shared.model_name = shared.args.model
 
     # removed elif len(available_models) == 1:
-
+#sss
     # removed elif shared.args.model_menu: Select the model from a command-line menu
 
     # If any model has been selected, load it
