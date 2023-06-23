@@ -1,6 +1,7 @@
 import argparse
 from collections import OrderedDict
 from pathlib import Path
+import os
 
 import yaml
 
@@ -9,7 +10,8 @@ from modules.logging_colors import logger
 generation_lock = None
 model = None
 tokenizer = None
-model_name = "mayaeary_pygmalion-6b_dev-4bit-128g"
+#model_name = "mayaeary_pygmalion-6b_dev-4bit-128g\config.json"
+model_name = "mayaeary_pygmalion-6b_dev-4bit-128g\pygmalion-6b_dev-4bit-128g.safetensors"
 model_type = None
 lora_names = []
 soft_prompt_tensor = None
@@ -215,21 +217,19 @@ def is_chat():
     return args.chat
 
 
-# Loading model-specific settings
-with Path(f'{args.model_dir}/config.yaml') as p:
-    if p.exists():
-        model_config = yaml.safe_load(open(p, 'r').read())
-    else:
-        model_config = {}
+# removed Loading model-specific settings
 
 # Applying user-defined model settings
-with Path(f'{args.model_dir}/config-user.yaml') as p:
-    if p.exists():
-        user_config = yaml.safe_load(open(p, 'r').read())
-        for k in user_config:
-            if k in model_config:
-                model_config[k].update(user_config[k])
-            else:
-                model_config[k] = user_config[k]
+model_config = {}
+p = Path("C:"+os.sep+"Users"+os.sep+"suran"+os.sep+"Desktop"+os.sep+"School"+os.sep+"MINDEASE_pg"+os.sep+"MindEase_pg"+os.sep+"config-user.yaml")
+#with Path(f'{args.model_dir}/config-user.yaml') as p:
+if p.exists():
+    user_config = yaml.safe_load(open(p, 'r').read())
+    for k in user_config:
+        if k in model_config:
+            model_config[k].update(user_config[k])
+        else:
+            model_config[k] = user_config[k]
 
 model_config = OrderedDict(model_config)
+

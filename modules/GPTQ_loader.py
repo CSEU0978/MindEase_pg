@@ -22,7 +22,7 @@ except ImportError:
     sys.exit(-1)
 
 try:
-    from modelutils import find_layers
+    from modelutils import find_layers 
 except ImportError:
     from utils import find_layers
 

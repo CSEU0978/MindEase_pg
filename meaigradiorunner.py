@@ -323,8 +323,8 @@ def create_interface():
 if __name__ == "__main__":
     # Loading custom settings
     settings_file = None
-    if shared.args.settings is not None and Path(shared.args.settings).exists():
-        settings_file = Path(shared.args.settings)
+    #if shared.args.settings is not None and Path(shared.args.settings).exists():
+    #    settings_file = Path(shared.args.settings)
     # elif Path('settings.yaml').exists():
       #  settings_file = Path('settings.yaml')
     # elif Path('settings.json').exists():
@@ -336,10 +336,13 @@ if __name__ == "__main__":
         new_settings = json.loads(file_contents) if settings_file.suffix == "json" else yaml.safe_load(file_contents)
         for item in new_settings:
             shared.settings[item] = new_settings[item]
+    else :
+        shared.settings
 
-    # Set model settings based on settings file
+    # Set model settings based on settings file modified
+    '''
     shared.model_config['.*'] = {
-        'wbits': 'None',
+        'wbits': 'fjgnjsdfngisndfigjksdf',
         'model_type': 'None',
         'groupsize': 'None',
         'pre_layer': 0,
@@ -347,8 +350,8 @@ if __name__ == "__main__":
         'skip_special_tokens': shared.settings['skip_special_tokens'],
         'custom_stopping_strings': shared.settings['custom_stopping_strings'],
     }
-
-    shared.model_config.move_to_end('.*', last=False)  # Move to the beginning
+    '''
+    #shared.model_config.move_to_end('.*', last=False)  # Move to the beginning
 
     # Default extensions modified - for no exts usage. 
     # imported get_available_extensions(), def natural_keys(text) and def atoi(text): from utils.py
@@ -380,7 +383,7 @@ if __name__ == "__main__":
         shared.model_name = shared.args.model
 
     # removed elif len(available_models) == 1:
-#sss
+
     # removed elif shared.args.model_menu: Select the model from a command-line menu
 
     # If any model has been selected, load it
@@ -392,6 +395,8 @@ if __name__ == "__main__":
         
 
         # Load the model
+        print ("model name is: " + shared.model_name)
+        print (shared.model_config)
         shared.model, shared.tokenizer = load_model(shared.model_name)
         #if shared.args.lora:
         #    add_lora_to_model(shared.args.lora)

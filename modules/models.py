@@ -24,6 +24,7 @@ local_rank = None
 
 # removed if shared.args.deepspeed as its only for linux
 
+#tail-free and top-a sampling patch
 sampler_hijack.hijack_samplers()
 
 # Some models require special treatment in various parts of the code.
@@ -64,12 +65,13 @@ def load_model(model_name):
     t0 = time.time()
 
     shared.model_type = find_model_type(model_name)
-    if shared.model_type == 'None':
-        logger.error('The path to the model does not exist. Exiting.')
-        return None, None
+    #if shared.model_type == 'None':
+    #    logger.error('The path to the model does not exist. Exiting.')
+    #    return None, None
 
     # removed if shared.args.autogptq:
-    if shared.args.wbits > 0:
+    # makeshift modification to load gptj style model with wbits specified settings 
+    if shared.args.wbits > 0 or shared.model_type == 'gptj':
         load_func = GPTQ_loader
     elif shared.model_type == 'llamacpp':
         load_func = llamacpp_loader
