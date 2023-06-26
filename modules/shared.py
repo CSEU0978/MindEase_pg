@@ -107,6 +107,7 @@ settings_file = None        # directory of file that leads to settings.yaml or s
 extensions = []             # type=str, nargs="+"
 verbose = True              # prints prompts to terminal
 
+
 # Accelerate/transformers -x- removed 11 add args
 cpu = False                 # use CPU ONLY to generate text
 auto_devices = True         # automatically split model between available GPUs and CPUs
@@ -128,6 +129,7 @@ compute_dtype= 'bfloat16'   # type=string , Valid options: bfloat16, float16, fl
 quant_type = 'fp4'          # type=string , Valid options: nf4, fp4
 use_double_quant = False    
 
+
 # llama.cpp -x- removed 7 add args
 threads = 0                 # type=int , default=0 , threads to use
 n_batch = 512               # type=int , default=512 , Max prompt tokens in a batch when calling llama_eval
@@ -138,16 +140,20 @@ n_gpu_layers = 0            # type=int , default=0 , layer offload to GPU
 n_ctx = 2048                # type=int , default=2048 , size of prompt context
 llama_cpp_seed = 0          # type=int , default=0 (random) 
 
-# GPTQ
-parser.add_argument('--wbits', type=int, default=0, help='Load a pre-quantized model with specified precision in bits. 2, 3, 4 and 8 are supported.')
-parser.add_argument('--model_type', type=str, help='Model type of pre-quantized model. Currently LLaMA, OPT, and GPT-J are supported.')
-parser.add_argument('--groupsize', type=int, default=-1, help='Group size.')
-parser.add_argument('--pre_layer', type=int, nargs="+", help='The number of layers to allocate to the GPU. Setting this parameter enables CPU offloading for 4-bit models. For multi-gpu, write the numbers separated by spaces, eg --pre_layer 30 60.')
-parser.add_argument('--checkpoint', type=str, help='The path to the quantized checkpoint file. If not specified, it will be automatically detected.')
-parser.add_argument('--monkey-patch', action='store_true', help='Apply the monkey patch for using LoRAs with quantized models.')
-parser.add_argument('--quant_attn', action='store_true', help='(triton) Enable quant attention.')
-parser.add_argument('--warmup_autotune', action='store_true', help='(triton) Enable warmup autotune.')
-parser.add_argument('--fused_mlp', action='store_true', help='(triton) Enable fused mlp.')
+
+# GPTQ -x- removed 9 add args
+# set according to mayaeary_pygmalion-6b_dev-4bit-128g
+wbits = 4                   # type=int , default=0, Valid options = 2, 3, 4 and 8 bits supported for loading a pre-quantized model
+model_type = 'gptj'         # type=string , Valid options = llama , opt , gptj
+groupsize = 128             # type=int , default= -1  
+pre_layer = []              # type=int , nargs="+" , sets the number of layers to allocate to GPU(s*), enables CPU offloading for 4-bit models
+checkpoint = ''             # type=string , path to checkpoint file, automatically detects file if not set
+monkey_patch = False        # monkey patch for LoRA applications on quantized models -> functionality not added yet
+# TRITON GPU INFERENCE SUPPORT #
+quant_attn = False          # for CUDA Triton support. -> enable for Triton GPU inference 
+warmup_attn = False         # Triton warmup autotune
+fused_mlp = False           # Triton fused mlp (multilayer perceptron)
+
 
 # AutoGPTQ
 parser.add_argument('--autogptq', action='store_true', help='Use AutoGPTQ for loading quantized models instead of the internal GPTQ loader.')
