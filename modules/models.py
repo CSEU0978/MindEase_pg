@@ -14,8 +14,8 @@ from transformers import (AutoConfig, AutoModel, AutoModelForCausalLM,
                           AutoModelForSeq2SeqLM, AutoTokenizer,
                           BitsAndBytesConfig, LlamaTokenizer)
 
-import modules.shared as shared
-from modules import llama_attn_hijack, sampler_hijack #DOUBLE CHECK THESE FILES 
+from modules import shared
+from modules import sampler_hijack #DOUBLE CHECK THESE FILES 
 from modules.logging_colors import logger # to differentiate input and output/ bot and user
 
 transformers.logging.set_verbosity_error()
@@ -30,7 +30,8 @@ sampler_hijack.hijack_samplers()
 # Some models require special treatment in various parts of the code.
 # This function detects model name for def load_model 
 def find_model_type(model_name):
-    path_to_model = Path(f'{shared.args.model_dir}/{model_name}')
+    path_to_model = Path(f'{shared.args.model_dir}'+ os.sep +'{model_name}')
+    print (path_to_model)
     if not path_to_model.exists():
         return 'None'
     # convert model name to lowercase and resume search for model for def load_model
@@ -91,21 +92,19 @@ def load_model(model_name):
         else:
             tokenizer = load_tokenizer(model_name, model)
 
-    # Hijack attention with xformers
-    if any((shared.args.xformers, shared.args.sdp_attention)):
-        llama_attn_hijack.hijack_llama_attention()
-
+    # removed Hijack attention with xformers or sdp_attention
+   
     logger.info(f"Loaded the model in {(time.time()-t0):.2f} seconds.\n")
     return model, tokenizer
 
 def load_tokenizer(model_name, model):
     tokenizer = None
-    if shared.model_type == 'gpt4chan' and Path(f"{shared.args.model_dir}/gpt-j-6B/").exists():
-        tokenizer = AutoTokenizer.from_pretrained(Path(f"{shared.args.model_dir}/gpt-j-6B/"))
+    if shared.model_type == 'gpt4chan' and Path(f"{shared.args.model_dir}"+ os.sep +"gpt-j-6B"+os.sep).exists():
+        tokenizer = AutoTokenizer.from_pretrained(Path(f"{shared.args.model_dir}"+ os.sep +"gpt-j-6B" + os.sep))
     elif type(model) is transformers.LlamaForCausalLM or "LlamaGPTQForCausalLM" in str(type(model)):
         # Try to load an universal LLaMA tokenizer
         if shared.model_type not in ['llava', 'oasst']:
-            for p in [Path(f"{shared.args.model_dir}/llama-tokenizer/"), Path(f"{shared.args.model_dir}/oobabooga_llama-tokenizer/")]:
+            for p in [Path(f"{shared.args.model_dir}"+ os.sep +"llama-tokenizer"+ os.sep), Path(f"{shared.args.model_dir}"+ os.sep +"oobabooga_llama-tokenizer"+ os.sep)]:
                 if p.exists():
                     logger.info(f"Loading the universal LLaMA tokenizer from {p}...")
                     tokenizer = LlamaTokenizer.from_pretrained(p, clean_up_tokenization_spaces=True)
@@ -113,7 +112,7 @@ def load_tokenizer(model_name, model):
 
         # Otherwise, load it from the model folder and hope that these
         # are not outdated tokenizer files.
-        tokenizer = LlamaTokenizer.from_pretrained(Path(f"{shared.args.model_dir}/{model_name}/"), clean_up_tokenization_spaces=True)
+        tokenizer = LlamaTokenizer.from_pretrained(Path(f"{shared.args.model_dir}"+ os.sep + "{model_name}" + os.sep), clean_up_tokenization_spaces=True)
         try:
             tokenizer.eos_token_id = 2
             tokenizer.bos_token_id = 1
@@ -121,7 +120,7 @@ def load_tokenizer(model_name, model):
         except:
             pass
     else:
-        path_to_model = Path(f"{shared.args.model_dir}/{model_name}/")
+        path_to_model = Path(f"{shared.args.model_dir}"+ os.sep +"{model_name}"+ os.sep)
         if path_to_model.exists():
             tokenizer = AutoTokenizer.from_pretrained(path_to_model, trust_remote_code=shared.args.trust_remote_code)
 
@@ -136,12 +135,16 @@ def huggingface_loader(model_name):
     else:
         LoaderClass = AutoModelForCausalLM
 
+    if (torch.cuda.is_available):
+        params = {
+            "b"
+        }
     # Load the model in simple 16-bit mode by default
     if not any([shared.args.cpu, shared.args.load_in_8bit, shared.args.load_in_4bit, shared.args.auto_devices, shared.args.disk, shared.args.deepspeed, shared.args.gpu_memory is not None, shared.args.cpu_memory is not None]):
-        model = LoaderClass.from_pretrained(Path(f"{shared.args.model_dir}/{model_name}"), low_cpu_mem_usage=True, torch_dtype=torch.bfloat16 if shared.args.bf16 else torch.float16, trust_remote_code=shared.args.trust_remote_code)
+        model = LoaderClass.from_pretrained(Path(f"{shared.args.model_dir}"+ os.sep +"{model_name}"), low_cpu_mem_usage=True, torch_dtype=torch.bfloat16 if shared.args.bf16 else torch.float16, trust_remote_code=shared.args.trust_remote_code)
         # removed if torch.has_mps: as mps is support related to mac and apple architectures - support is unrelated for now
         model = model.cuda()
-
+ 
     # removed elif shared.args. deepspeed for DeepSpeed ZeRO-3
 
     # Custom
@@ -186,7 +189,7 @@ def huggingface_loader(model_name):
             if shared.args.disk:
                 params["offload_folder"] = shared.args.disk_cache_dir
 
-        checkpoint = Path(f'{shared.args.model_dir}/{model_name}')
+        checkpoint = Path(f'{shared.args.model_dir}'+ os.sep +'{model_name}')
         if shared.args.load_in_8bit and params.get('max_memory', None) is not None and params['device_map'] == 'auto':
             config = AutoConfig.from_pretrained(checkpoint, trust_remote_code=shared.args.trust_remote_code)
             with init_empty_weights():
@@ -235,11 +238,11 @@ def flexgen_loader(model_name):
 def llamacpp_loader(model_name):
     from modules.llamacpp_model import LlamaCppModel
 
-    path = Path(f'{shared.args.model_dir}/{model_name}')
+    path = Path(f'{shared.args.model_dir}'+ os.sep +'{model_name}')
     if path.is_file():
         model_file = path
     else:
-        model_file = list(Path(f'{shared.args.model_dir}/{model_name}').glob('*ggml*.bin'))[0]
+        model_file = list(Path(f'{shared.args.model_dir}'+ os.sep +'{model_name}').glob('*ggml*.bin'))[0]
 
     logger.info(f"llama.cpp weights detected: {model_file}\n")
     model, tokenizer = LlamaCppModel.from_pretrained(model_file)
@@ -248,7 +251,7 @@ def llamacpp_loader(model_name):
 
 def GPTQ_loader(model_name):
 
-    # removed the Monkey patch for loading LoRAs for GPTQ
+    # removed the Monkey patch for loading LoRAs for GPTQ - uses load_model_llama
     import modules.GPTQ_loader
     model = modules.GPTQ_loader.load_quantized(model_name)
 
@@ -302,7 +305,7 @@ def load_soft_prompt(name):
         shared.soft_prompt = False
         shared.soft_prompt_tensor = None
     else:
-        with zipfile.ZipFile(Path(f'softprompts/{name}.zip')) as zf:
+        with zipfile.ZipFile(Path(f'softprompts'+ os.sep +'{name}.zip')) as zf:
             zf.extract('tensor.npy')
             zf.extract('meta.json')
             j = json.loads(open('meta.json', 'r').read())

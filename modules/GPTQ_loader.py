@@ -2,7 +2,7 @@ import inspect
 import re
 import sys
 from pathlib import Path
-
+import os
 
 import accelerate
 import torch
@@ -107,7 +107,7 @@ def find_quantized_model_file(model_name):
     if shared.args.checkpoint:
         return Path(shared.args.checkpoint)
 
-    path_to_model = Path(f'{shared.args.model_dir}/{model_name}')
+    path_to_model = Path(f'{shared.args.model_dir}'+ os.sep +'{model_name}')
     pt_path = None
     priority_name_list = [
         Path(f'{shared.args.model_dir}/{model_name}{hyphen}{shared.args.wbits}bit{group}{ext}')

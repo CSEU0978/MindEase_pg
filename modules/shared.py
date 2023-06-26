@@ -85,51 +85,58 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
-parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=54))
+#parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=54))
+parser = argparse.ArgumentParser()
 
-# Basic settings
-parser.add_argument('--notebook', action='store_true', help='Launch the web UI in notebook mode, where the output is written to the same text box as the input.')
-parser.add_argument('--chat', action='store_true', help='Launch the web UI in chat mode with a style similar to the Character.AI website.')
-parser.add_argument('--character', type=str, help='The name of the character to load in chat mode by default.')
-parser.add_argument('--model', type=str, help='Name of the model to load by default.')
-parser.add_argument('--lora', type=str, nargs="+", help='The list of LoRAs to load. If you want to load more than one LoRA, write the names separated by spaces.')
-parser.add_argument("--model-dir", type=str, default='models/', help="Path to directory with all the models")
-parser.add_argument("--lora-dir", type=str, default='loras/', help="Path to directory with all the loras")
-parser.add_argument('--model-menu', action='store_true', help='Show a model menu in the terminal when the web UI is first launched.')
-parser.add_argument('--no-stream', action='store_true', help='Don\'t stream the text output in real time.')
-parser.add_argument('--settings', type=str, help='Load the default interface settings from this yaml file. See settings-template.yaml for an example. If you create a file called settings.yaml, this file will be loaded by default without the need to use the --settings flag.')
-parser.add_argument('--extensions', type=str, nargs="+", help='The list of extensions to load. If you want to load more than one extension, write the names separated by spaces.')
-parser.add_argument('--verbose', action='store_true', help='Print the prompts to the terminal.')
+'''
+SHARED FILE IS RESPONSIBLE FOR ALL CHANGES IN SETTINGS REGARDING MODEL, DIRECTORIES, ARGS, ETC.
+ARGS LISTED BELOW ARE HARDCODED. CAN BE REVERTED BACK TO COMMAND LINE CODE VIA:
+parser.add_argument('--ARG', TYPE, NARGS(IF REQUIRED - for joining multiple), HELP='HELP MESSAGE')
 
-# Accelerate/transformers
-parser.add_argument('--cpu', action='store_true', help='Use the CPU to generate text. Warning: Training on CPU is extremely slow.')
-parser.add_argument('--auto-devices', action='store_true', help='Automatically split the model across the available GPU(s) and CPU.')
-parser.add_argument('--gpu-memory', type=str, nargs="+", help='Maximum GPU memory in GiB to be allocated per GPU. Example: --gpu-memory 10 for a single GPU, --gpu-memory 10 5 for two GPUs. You can also set values in MiB like --gpu-memory 3500MiB.')
-parser.add_argument('--cpu-memory', type=str, help='Maximum CPU memory in GiB to allocate for offloaded weights. Same as above.')
-parser.add_argument('--disk', action='store_true', help='If the model is too large for your GPU(s) and CPU combined, send the remaining layers to the disk.')
-parser.add_argument('--disk-cache-dir', type=str, default="cache", help='Directory to save the disk cache to. Defaults to "cache".')
-parser.add_argument('--load-in-8bit', action='store_true', help='Load the model with 8-bit precision (using bitsandbytes).')
-parser.add_argument('--bf16', action='store_true', help='Load the model with bfloat16 precision. Requires NVIDIA Ampere GPU.')
-parser.add_argument('--no-cache', action='store_true', help='Set use_cache to False while generating text. This reduces the VRAM usage a bit at a performance cost.')
-parser.add_argument('--xformers', action='store_true', help="Use xformer's memory efficient attention. This should increase your tokens/s.")
-parser.add_argument('--sdp-attention', action='store_true', help="Use torch 2.0's sdp attention.")
-parser.add_argument('--trust-remote-code', action='store_true', help="Set trust_remote_code=True while loading a model. Necessary for ChatGLM and Falcon.")
+'''
 
-# Accelerate 4-bit
-parser.add_argument('--load-in-4bit', action='store_true', help='Load the model with 4-bit precision (using bitsandbytes).')
-parser.add_argument('--compute_dtype', type=str, default="float16", help="compute dtype for 4-bit. Valid options: bfloat16, float16, float32.")
-parser.add_argument('--quant_type', type=str, default="nf4", help='quant_type for 4-bit. Valid options: nf4, fp4.')
-parser.add_argument('--use_double_quant', action='store_true', help='use_double_quant for 4-bit.')
+# Basic settings -x- removed 11 add args
+notebook = False         
+chat = True
+character = False
+model_dir = ''              # type=string
+lora_dir = None             # [], type=string nargs "+"
+model_menu = None           # [], not required
+no_stream = True            # check that it only applies to stopping generation 
+settings_file = None        # directory of file that leads to settings.yaml or settings.json
+extensions = []             # type=str, nargs="+"
+verbose = True              # prints prompts to terminal
 
-# llama.cpp
-parser.add_argument('--threads', type=int, default=0, help='Number of threads to use.')
-parser.add_argument('--n_batch', type=int, default=512, help='Maximum number of prompt tokens to batch together when calling llama_eval.')
-parser.add_argument('--no-mmap', action='store_true', help='Prevent mmap from being used.')
-parser.add_argument('--mlock', action='store_true', help='Force the system to keep the model in RAM.')
-parser.add_argument('--cache-capacity', type=str, help='Maximum cache capacity. Examples: 2000MiB, 2GiB. When provided without units, bytes will be assumed.')
-parser.add_argument('--n-gpu-layers', type=int, default=0, help='Number of layers to offload to the GPU.')
-parser.add_argument('--n_ctx', type=int, default=2048, help='Size of the prompt context.')
-parser.add_argument('--llama_cpp_seed', type=int, default=0, help='Seed for llama-cpp models. Default 0 (random)')
+# Accelerate/transformers -x- removed 11 add args
+cpu = False                 # use CPU ONLY to generate text
+auto_devices = True         # automatically split model between available GPUs and CPUs
+gpu_memory = 4              # type=string , nargs="+" in GiB, alternatively can set in MiB like 3500MiB
+cpu_memory = ''             # type=string , same as above in GiB or MiB
+disk = True                 # offloads remaining model layers to disk if model is too big -> creates disk cache on env creation and wipes it on termination
+disk_cache_dir = "cache"    # type=string , defaults to cache directory
+load_in_8bit = False        # 8-bit precision using BitsandBytes 
+bf16 = False                # bloat16 precision, NVIDIA Ampere GPU required
+no_cache = False            # no caching, reduces VRAM usage
+#xformers = False           # memory efficient attention, miniscule increase in tokens/s -> needs explicit imports and installation of xformers
+#sdp_attention = False      # torch 2.0 sdp attention for llama_attn_hijack -> use with xformers to marginally increase tokens/s
+trust_remote_code = False   # for loading ChatGLM and Falcon models
+
+
+# Accelerate 4-bit -x- removed 4 add args
+load_in_4bit = True         # 4-bit precision with BitsAndBytes
+compute_dtype= 'bfloat16'   # type=string , Valid options: bfloat16, float16, float32
+quant_type = 'fp4'          # type=string , Valid options: nf4, fp4
+use_double_quant = False    
+
+# llama.cpp -x- removed 7 add args
+threads = 0                 # type=int , default=0 , threads to use
+n_batch = 512               # type=int , default=512 , Max prompt tokens in a batch when calling llama_eval
+no_mmap = False             # setting to True prevents mmap from being used
+mlock = False               # Memory-lock makes system to keep model in RAM
+cache_capacity =''          # type=string , max capacity in ####MiB or #GiB , defaults to bytes without units
+n_gpu_layers = 0            # type=int , default=0 , layer offload to GPU
+n_ctx = 2048                # type=int , default=2048 , size of prompt context
+llama_cpp_seed = 0          # type=int , default=0 (random) 
 
 # GPTQ
 parser.add_argument('--wbits', type=int, default=0, help='Load a pre-quantized model with specified precision in bits. 2, 3, 4 and 8 are supported.')
@@ -220,8 +227,11 @@ def is_chat():
 # removed Loading model-specific settings
 
 # Applying user-defined model settings
+# hardcoded path
 model_config = {}
-p = Path("C:"+os.sep+"Users"+os.sep+"suran"+os.sep+"Desktop"+os.sep+"School"+os.sep+"MINDEASE_pg"+os.sep+"MindEase_pg"+os.sep+"config-user.yaml")
+p = Path("C:"+ os.sep +"Users"+ os.sep +"suran"+ os.sep +"Desktop"+ os.sep +"School"+ os.sep +"MINDEASE_pg"
+         + os.sep +"MindEase_pg"+ os.sep +"config-user.yaml" 
+        )
 #with Path(f'{args.model_dir}/config-user.yaml') as p:
 if p.exists():
     user_config = yaml.safe_load(open(p, 'r').read())

@@ -45,15 +45,18 @@ import modules.extensions as extensions_module
 from modules import chat, shared, ui  # removed training, utils
 from modules.extensions import apply_extensions
 from modules.html_generator import chat_html_wrapper
-# #removed LoRA import
-from modules.models import load_model, load_soft_prompt, unload_model
-from modules.text_generation import (generate_reply_wrapper,
-                                              get_encoded_length,
-                                              stop_everything_event)
+from modules.LoRA import add_lora_to_model
+from modules.models import load_model # load_soft_prompt, unload_model
+from modules.text_generation import (#generate_reply_wrapper,
+                                        get_encoded_length,
+                                        stop_everything_event)
 
 # removed def load_model_wrapper function related to model loading, loading error if no model, updating settings for manual load
 
-# removed Function -def load_lora_wrapper(selected-loras): 
+def load_lora_wrapper(selected_loras):
+    yield ("Applying the following LoRAs to {}:\n\n{}".format(shared.model_name, '\n'.join(selected_loras)))
+    add_lora_to_model(selected_loras)
+    yield ("Successfuly applied the LoRAs")
 
 # removed def load_preset_values function to load parameters manually
     # removed 3 functions to set params from presets menu
@@ -322,7 +325,6 @@ def create_interface():
 
 if __name__ == "__main__":
     # Loading custom settings
-    settings_file = None
     #if shared.args.settings is not None and Path(shared.args.settings).exists():
     #    settings_file = Path(shared.args.settings)
     # elif Path('settings.yaml').exists():
@@ -330,10 +332,10 @@ if __name__ == "__main__":
     # elif Path('settings.json').exists():
       #  settings_file = Path('settings.json')
 
-    if settings_file is not None:
-        logger.info(f"Loading settings from {settings_file}...")
-        file_contents = open(settings_file, 'r', encoding='utf-8').read()
-        new_settings = json.loads(file_contents) if settings_file.suffix == "json" else yaml.safe_load(file_contents)
+    if shared.settings_file is not None and Path(shared.settings_file+ os.sep +'settings.yaml').exists():
+        logger.info(f"Loading settings from {shared.settings_file}...")
+        file_contents = open(shared.settings_file, 'r', encoding='utf-8').read()
+        new_settings = json.loads(file_contents) if shared.settings_file.suffix == "json" else yaml.safe_load(file_contents)
         for item in new_settings:
             shared.settings[item] = new_settings[item]
     else :
@@ -376,11 +378,11 @@ if __name__ == "__main__":
             if extension not in shared.args.extensions:
                 shared.args.extensions.append(extension)
 
-    available_models = shared.args.model
+    #available_models = shared.args.model
 
     # Model defined through --model
-    if shared.args.model is not None:
-        shared.model_name = shared.args.model
+    #if shared.args.model is not None:
+     #   shared.model_name = shared.args.model
 
     # removed elif len(available_models) == 1:
 
@@ -398,8 +400,8 @@ if __name__ == "__main__":
         print ("model name is: " + shared.model_name)
         print (shared.model_config)
         shared.model, shared.tokenizer = load_model(shared.model_name)
-        #if shared.args.lora:
-        #    add_lora_to_model(shared.args.lora)
+        if shared.args.lora:
+            add_lora_to_model(shared.args.lora)
 
     # Force a character to be loaded
     if shared.is_chat():
