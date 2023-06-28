@@ -27,25 +27,25 @@ class LlamaCppModel:
         result = self()
 
         cache_capacity = 0
-        if shared.args.cache_capacity is not None:
-            if 'GiB' in shared.args.cache_capacity:
-                cache_capacity = int(re.sub('[a-zA-Z]', '', shared.args.cache_capacity)) * 1000 * 1000 * 1000
-            elif 'MiB' in shared.args.cache_capacity:
-                cache_capacity = int(re.sub('[a-zA-Z]', '', shared.args.cache_capacity)) * 1000 * 1000
+        if shared.args['cache_capacity'] is not None:
+            if 'GiB' in shared.args['cache_capacity']:
+                cache_capacity = int(re.sub('[a-zA-Z]', '', shared.args['cache_capacity'])) * 1000 * 1000 * 1000
+            elif 'MiB' in shared.args['cache_capacity']:
+                cache_capacity = int(re.sub('[a-zA-Z]', '', shared.args['cache_capacity'])) * 1000 * 1000
             else:
-                cache_capacity = int(shared.args.cache_capacity)
+                cache_capacity = int(shared.args['cache_capacity'])
 
         logger.info("Cache capacity is " + str(cache_capacity) + " bytes")
 
         params = {
             'model_path': str(path),
-            'n_ctx': shared.args.n_ctx,
-            'seed': int(shared.args.llama_cpp_seed),
-            'n_threads': shared.args.threads or None,
-            'n_batch': shared.args.n_batch,
-            'use_mmap': not shared.args.no_mmap,
-            'use_mlock': shared.args.mlock,
-            'n_gpu_layers': shared.args.n_gpu_layers
+            'n_ctx': shared.args['n_ctx'],
+            'seed': int(shared.args['llama_cpp_seed']),
+            'n_threads': shared.args['threads'] or None,
+            'n_batch': shared.args['n_batch'],
+            'use_mmap': not shared.args['no_mmap'],
+            'use_mlock': shared.args['mlock'],
+            'n_gpu_layers': shared.args['n_gpu_layers']
         }
         self.model = Llama(**params)
         if cache_capacity > 0:

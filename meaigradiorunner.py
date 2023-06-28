@@ -148,16 +148,16 @@ def set_interface_arguments(interface_mode, extensions, bool_active):
     cmd_list = vars(shared.args)
     bool_list = [k for k in cmd_list if type(cmd_list[k]) is bool and k not in modes]
 
-    shared.args.extensions = extensions
+    shared.args['extensions'] = extensions
     for k in modes[1:]:
-        setattr(shared.args, k, False)
+        setattr(shared.args[k], k, False)
     if interface_mode != "default":
         setattr(shared.args, interface_mode, True)
 
     for k in bool_list:
-        setattr(shared.args, k, False)
+        setattr(shared.args[k], k, False)
     for k in bool_active:
-        setattr(shared.args, k, True)
+        setattr(shared.args[k], k, True)
 
     shared.need_restart = True
 
@@ -173,17 +173,17 @@ def create_interface():
     # Authentication variables
     auth = None
     gradio_auth_creds = []
-    if shared.args.gradio_auth:
-        gradio_auth_creds += [x.strip() for x in shared.args.gradio_auth.strip('"').replace('\n', '').split(',') if x.strip()]
-    if shared.args.gradio_auth_path is not None:
-        with open(shared.args.gradio_auth_path, 'r', encoding="utf8") as file:
+    if shared.args['gradio_auth']:
+        gradio_auth_creds += [x.strip() for x in shared.args['gradio_auth'].strip('"').replace('\n', '').split(',') if x.strip()]
+    if shared.args['gradio_auth_path'] is not None:
+        with open(shared.args['gradio_auth_path'], 'r', encoding="utf8") as file:
             for line in file.readlines():
                 gradio_auth_creds += [x.strip() for x in line.split(',') if x.strip()]
     if gradio_auth_creds:
         auth = [tuple(cred.split(':')) for cred in gradio_auth_creds]
 
     # Importing the extension files and executing their setup() functions
-    if shared.args.extensions is not None and len(shared.args.extensions) > 0:
+    if shared.args['extensions'] is not None and len(shared.args['extensions']) > 0:
         extensions_module.load_extensions()
 
     # css/js strings
@@ -286,7 +286,7 @@ def create_interface():
                 chat.redraw_html, shared.reload_inputs, shared.gradio['display'])
 
             shared.gradio['Stop'].click(
-                stop_everything_event, None, None, queue=False, cancels=gen_events if shared.args.no_stream else None).then(
+                stop_everything_event, None, None, queue=False, cancels=gen_events if shared.args['no_stream'] else None).then(
                 chat.redraw_html, shared.reload_inputs, shared.gradio['display'])
 
             #removed shared.gradio['mode'].change()
@@ -313,29 +313,30 @@ def create_interface():
         shared.gradio['interface'].load(partial(ui.apply_interface_values, {}, use_persistent=True), None, [shared.gradio[k] for k in ui.list_interface_input_elements(chat=shared.is_chat())], show_progress=False)
 
         # removed Extensions tabs
+        
         # removed Extensions block
         
     # Launch the interface
     shared.gradio['interface'].queue()
-    if shared.args.listen:
-        shared.gradio['interface'].launch(prevent_thread_lock=True, share=shared.args.share, server_name=shared.args.listen_host or '0.0.0.0', server_port=shared.args.listen_port, inbrowser=shared.args.auto_launch, auth=auth)
+    if shared.args['listen']:
+        shared.gradio['interface'].launch(prevent_thread_lock=True, share=shared.args['share'], server_name=shared.args['listen_host'] or '0.0.0.0', server_port=shared.args['listen_port'], inbrowser=shared.args['auto_launch'], auth=auth)
     else:
-        shared.gradio['interface'].launch(prevent_thread_lock=True, share=shared.args.share, server_port=shared.args.listen_port, inbrowser=shared.args.auto_launch, auth=auth)
+        shared.gradio['interface'].launch(prevent_thread_lock=True, share=shared.args['share'], server_port=shared.args['listen_port'], inbrowser=shared.args['auto_launch'], auth=auth)
 
 
 if __name__ == "__main__":
     # Loading custom settings
-    #if shared.args.settings is not None and Path(shared.args.settings).exists():
-    #    settings_file = Path(shared.args.settings)
+    #if shared.args['settings_file'] is not None and Path(shared.args['settings']).exists():
+    #    settings_file = Path(shared.args['settings'])
     # elif Path('settings.yaml').exists():
       #  settings_file = Path('settings.yaml')
     # elif Path('settings.json').exists():
       #  settings_file = Path('settings.json')
 
-    if shared.settings_file is not None and Path(shared.settings_file+ os.sep +'settings.yaml').exists():
-        logger.info(f"Loading settings from {shared.settings_file}...")
-        file_contents = open(shared.settings_file, 'r', encoding='utf-8').read()
-        new_settings = json.loads(file_contents) if shared.settings_file.suffix == "json" else yaml.safe_load(file_contents)
+    if shared.args['settings_file'] is not None and Path(shared.args['settings_file']+ os.sep +'settings.yaml').exists():
+        logger.info(f"Loading settings from {shared.args['settings_file']}...")
+        file_contents = open(shared.args['settings_file'], 'r', encoding='utf-8').read()
+        new_settings = json.loads(file_contents) if shared.args['settings_file'].suffix == "json" else yaml.safe_load(file_contents)
         for item in new_settings:
             shared.settings[item] = new_settings[item]
     else :
@@ -369,24 +370,24 @@ if __name__ == "__main__":
     extensions_module.available_extensions = get_available_extensions()
     if shared.is_chat():
         for extension in shared.settings['chat_default_extensions']:
-            shared.args.extensions = shared.args.extensions or []
-            if extension not in shared.args.extensions:
-                shared.args.extensions.append(extension)
+            shared.args['extensions'] = shared.args['extensions'] or []
+            if extension not in shared.args['extensions']:
+                shared.args['extensions'].append(extension)
     else:
         for extension in shared.settings['default_extensions']:
-            shared.args.extensions = shared.args.extensions or []
-            if extension not in shared.args.extensions:
-                shared.args.extensions.append(extension)
+            shared.args['extensions'] = shared.args['extensions'] or []
+            if extension not in shared.args['extensions']:
+                shared.args['extensions'].append(extension)
 
-    #available_models = shared.args.model
+    #available_models = shared.args['model']
 
     # Model defined through --model
-    #if shared.args.model is not None:
-     #   shared.model_name = shared.args.model
+    #if shared.args['model'] is not None:
+     #   shared.model_name = shared.args['model']
 
     # removed elif len(available_models) == 1:
 
-    # removed elif shared.args.model_menu: Select the model from a command-line menu
+    # removed elif shared.args['model_menu']: Select the model from a command-line menu
 
     # If any model has been selected, load it
     if shared.model_name != 'None':
@@ -400,14 +401,14 @@ if __name__ == "__main__":
         print ("model name is: " + shared.model_name)
         print (shared.model_config)
         shared.model, shared.tokenizer = load_model(shared.model_name)
-        if shared.args.lora:
-            add_lora_to_model(shared.args.lora)
+        if shared.args['lora']:
+            add_lora_to_model(shared.args['lora'])
 
     # Force a character to be loaded
     if shared.is_chat():
         shared.persistent_interface_state.update({
             'mode': shared.settings['mode'],
-            'character_menu': shared.args.character or shared.settings['character'],
+            'character_menu': shared.args['character'] or shared.settings['character'],
             'instruction_template': shared.settings['instruction_template']
         })
 

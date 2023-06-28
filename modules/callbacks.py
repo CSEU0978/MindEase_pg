@@ -108,5 +108,5 @@ class Iteratorize:
 
 def clear_torch_cache():
     gc.collect()
-    if not shared.args.cpu:
+    if not shared.args['cpu']:
         torch.cuda.empty_cache()

@@ -36,7 +36,7 @@ def get_max_prompt_length(state):
 
 
 def encode(prompt, add_special_tokens=True, add_bos_token=True, truncation_length=None):
-    if shared.model_type in ['rwkv', 'llamacpp']:
+    if shared.model_type in ['llamacpp']: # removed 'rwkv'
         input_ids = shared.tokenizer.encode(str(prompt))
         input_ids = np.array(input_ids).reshape(1, len(input_ids))
         return input_ids
@@ -56,9 +56,9 @@ def encode(prompt, add_special_tokens=True, add_bos_token=True, truncation_lengt
     if truncation_length is not None:
         input_ids = input_ids[:, -truncation_length:]
 
-    if shared.model_type in ['rwkv', 'llamacpp'] or shared.args.cpu:
+    if shared.args['cpu'] or shared.model_type in ['llamacpp']: # removed 'rwkv'
         return input_ids
-    elif shared.args.flexgen:
+    elif shared.args['flexgen']:
         return input_ids.numpy()
     # removed elif shared.args.deepspeed
     # removed elif torch.has_mps: for mac support
@@ -142,9 +142,9 @@ def _generate_reply(question, state, eos_token=None, stopping_strings=None, is_c
     generate_func = apply_extensions('custom_generate_reply')
     if generate_func is None:
         # removed if shared.model_name == 'None' or shared.model is None:
-        if shared.model_type in ['rwkv', 'llamacpp']:
+        if shared.model_type in ['llamacpp']: # removed 'rwkv'
             generate_func = generate_reply_custom
-        elif shared.args.flexgen:
+        elif shared.args['flexgen']:
             generate_func = generate_reply_flexgen
         else:
             generate_func = generate_reply_HF
@@ -154,7 +154,7 @@ def _generate_reply(question, state, eos_token=None, stopping_strings=None, is_c
     if not is_chat:
         question = apply_extensions('input', question)
 
-    if shared.args.verbose:
+    if shared.args['verbose']:
         print(f'\n\n{question}\n--------------------\n')
 
     shared.stop_everything = False
@@ -188,7 +188,7 @@ def generate_reply_HF(question, original_question, seed, state, eos_token=None, 
     if state['ban_eos_token']:
         generate_params['suppress_tokens'] = [shared.tokenizer.eos_token_id]
 
-    if shared.args.no_cache:
+    if shared.args['no_cache']:
         generate_params.update({'use_cache': False})
 
     #removed if shared.args.deepspeed
@@ -196,7 +196,7 @@ def generate_reply_HF(question, original_question, seed, state, eos_token=None, 
     # Encode the input
     input_ids = encode(question, add_bos_token=state['add_bos_token'], truncation_length=get_max_prompt_length(state))
     output = input_ids[0]
-    cuda = not any((shared.args.cpu)) # removed shared.args.deepspeed
+    cuda = not any((shared.args['cpu'])) # removed shared.args.deepspeed
 
     # Find the eos tokens
     eos_token_ids = [shared.tokenizer.eos_token_id] if shared.tokenizer.eos_token_id is not None else []

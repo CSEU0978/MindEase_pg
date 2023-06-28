@@ -29,7 +29,7 @@ def add_lora_to_model(lora_names, lora_dir):
         if len(removed_set) == 0 and len(prior_set) > 0:
             logger.info(f"Adding the LoRA(s) named {added_set} to the model...")
             for lora in added_set:
-                shared.model.load_adapter(Path(f"{shared.args.lora_dir}"+os.sep+"{lora}"), lora)
+                shared.model.load_adapter(Path(f"{shared.args['lora_dir']}"+os.sep+"{lora}"), lora)
 
             return
 
@@ -41,19 +41,19 @@ def add_lora_to_model(lora_names, lora_dir):
         if len(lora_names) > 0:
             logger.info("Applying the following LoRAs to {}: {}".format(shared.model_name, ', '.join(lora_names)))
             params = {}
-            if not shared.args.cpu:
+            if not shared.args['cpu']:
                 params['dtype'] = shared.model.dtype
                 if hasattr(shared.model, "hf_device_map"):
                     params['device_map'] = {"base_model.model." + k: v for k, v in shared.model.hf_device_map.items()}
-                elif shared.args.load_in_8bit:
+                elif shared.args['load_in_8bit']:
                     params['device_map'] = {'': 0}
 
-            # shared.model = PeftModel.from_pretrained(shared.model, Path(f"{shared.args.lora_dir}/{lora_names[0]}"), **params)
+            # shared.model = PeftModel.from_pretrained(shared.model, Path(f"{shared.args['lora_dir']}/{lora_names[0]}"), **params)
 
             for lora in lora_names[1:]:
-                shared.model.load_adapter(Path(f"{shared.args.lora_dir}"+ os.sep +"{lora}"), lora)
+                shared.model.load_adapter(Path(f"{shared.args['lora_dir']}"+ os.sep +"{lora}"), lora)
 
-            if not shared.args.load_in_8bit and not shared.args.cpu:
+            if not shared.args['load_in_8bit'] and not shared.args['cpu']:
                 shared.model.half()
                 if not hasattr(shared.model, "hf_device_map"):
                     if torch.has_mps:
