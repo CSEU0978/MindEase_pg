@@ -12,14 +12,16 @@ from transformers import AutoConfig, AutoModelForCausalLM
 import modules.shared as shared
 from modules.logging_colors import logger
 
-gptq_repo_dir = shared.gptq_loader_dir
+gptq_repo_dir = shared.args['gptq_loader_dir']
 # hardcoded path
 
 sys.path.insert(0, str(gptq_repo_dir))
-print ("777777", sys.path )
 
+
+
+#removed llama inference offload -> leading to "triton not installed." error
 try:
-    import llama_inference_offload 
+    import llama_inference_offload
 except ImportError:
     logger.error('Failed to load GPTQ-for-LLaMa')
     logger.error('See https://github.com/oobabooga/text-generation-webui/blob/main/docs/GPTQ-models-(4-bit-mode).md')
@@ -90,7 +92,7 @@ def _load_quant(model, checkpoint, wbits, groupsize=-1, faster_kernel=False, exc
     else:
         model.load_state_dict(torch.load(checkpoint), strict=False)
 
-    if is_triton:
+    if is_triton ==True :
         if shared.args['quant_attn']:
             quant.make_quant_attn(model)
 
@@ -111,7 +113,7 @@ def find_quantized_model_file(model_name):
     if shared.args['checkpoint']:
         return Path(shared.args['checkpoint'])
 
-    path_to_model = Path(f"{shared.args['model_dir']}"+ os.sep +'{model_name}')
+    path_to_model = Path(f"{shared.args['model_dir']}"+ os.sep + model_name)
     pt_path = None
     '''
     priority_name_list = [
@@ -162,7 +164,7 @@ def load_quantized(model_name):
         exit()
 
     # Find the quantized model weights file (.pt/.safetensors)
-    path_to_model = Path(f"{shared.args['model_dir']}/{model_name}")
+    path_to_model = Path(shared.args['model_dir']+ os.sep + model_name)
     pt_path = find_quantized_model_file(model_name)
     if not pt_path:
         logger.error("Could not find the quantized model in .pt or .safetensors format, exiting...")

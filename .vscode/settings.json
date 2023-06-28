@@ -1,1 +1,5 @@
-{}
+{
+    "python.analysis.extraPaths": [
+        "./repositories/GPTQ-for-LLaMa-cuda"
+    ]
+}

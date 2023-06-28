@@ -10,7 +10,7 @@ generation_lock = None
 model = None
 tokenizer = None
 model_name = "mayaeary_pygmalion-6b_dev-4bit-128g\pygmalion-6b_dev-4bit-128g.safetensors"
-model_type = None
+model_type = 'gptj'
 lora_names = []
 soft_prompt_tensor = None
 soft_prompt = False
@@ -85,9 +85,8 @@ args =  {
         'notebook': False,         
         'chat': True,
         'character': False,
-        'model_dir': Path("C:"+ os.sep +"Users"+ os.sep +"suran"+ os.sep +"Desktop"+ os.sep +"School"+ os.sep +"MINDEASE_pg"
-                            + os.sep +"MindEase_pg"+ os.sep + "repositories" 
-                        ),           # type=string
+        'model_dir': Path ("C:"+ os.sep +"Users"+ os.sep +"suran"+ os.sep +"text-generation-webui"+ os.sep +"models"
+                           ),        # type=string
         'lora_dir': None,            # [], type=string nargs "+"
         'model_menu': None,          # [], not required
         'no_stream': True,           # default=True , check that it only applies to stopping generation 
@@ -135,7 +134,7 @@ args =  {
         'checkpoint': '',            # type=string , path to checkpoint file, automatically detects file if not set
       # 'monkey_patch': False,       # toggle for monkey patch for LoRA applications on quantized models -> functionality not added yet
         'gptq_loader_dir': Path("C:"+ os.sep +"Users"+ os.sep +"suran"+ os.sep +"Desktop"+ os.sep 
-                                +"School"+ os.sep +"MINDEASE_pg" + os.sep +"MindEase_pg"+ os.sep + "repositories" 
+                                +"School"+ os.sep +"MINDEASE_pg" + os.sep +"MindEase_pg"+ os.sep + "repositories" + os.sep + "GPTQ-for-LLaMa-cuda"
                             ),       # hardcoded path for gptq repo directory on local system
         # TRITON GPU INFERENCE SUPPORT with GPTQ
         'quant_attn': False,         # toggle for CUDA Triton support. -> enable for Triton GPU inference 

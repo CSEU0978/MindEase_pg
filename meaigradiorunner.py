@@ -345,7 +345,7 @@ if __name__ == "__main__":
     # Set model settings based on settings file modified
     '''
     shared.model_config['.*'] = {
-        'wbits': 'fjgnjsdfngisndfigjksdf',
+        'wbits': 'test1test2test3test4testes',
         'model_type': 'None',
         'groupsize': 'None',
         'pre_layer': 0,
