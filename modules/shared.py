@@ -9,7 +9,7 @@ from modules.logging_colors import logger
 generation_lock = None
 model = None
 tokenizer = None
-model_name = "mayaeary_pygmalion-6b_dev-4bit-128g\pygmalion-6b_dev-4bit-128g.safetensors"
+model_name = "pygmalion-6b_dev-4bit-128g.safetensors"
 model_type = 'gptj'
 lora_names = []
 soft_prompt_tensor = None
@@ -85,7 +85,8 @@ args =  {
         'notebook': False,         
         'chat': True,
         'character': False,
-        'model_dir': Path ("C:"+ os.sep +"Users"+ os.sep +"suran"+ os.sep +"text-generation-webui"+ os.sep +"models"
+        'model_dir': Path ("C:"+ os.sep +"Users"+ os.sep +"suran"+ os.sep +"text-generation-webui"+ os.sep +
+                           "models"+ os.sep + "mayaeary_pygmalion-6b_dev-4bit-128g"
                            ),        # type=string
         'lora_dir': None,            # [], type=string nargs "+"
         'model_menu': None,          # [], not required

@@ -114,7 +114,7 @@ def find_quantized_model_file(model_name):
         return Path(shared.args['checkpoint'])
 
     path_to_model = Path(f"{shared.args['model_dir']}"+ os.sep + model_name)
-    pt_path = None
+    pt_path = path_to_model
     '''
     priority_name_list = [
         #Path(f'{shared.args.model_dir}/{model_name}{hyphen}{shared.args.wbits}bit{group}{ext}')
@@ -127,7 +127,7 @@ def find_quantized_model_file(model_name):
         if path.exists():
             pt_path = path
             break
-            '''
+    '''    
     # If the model hasn't been found with a well-behaved name, pick the last .pt
     # or the last .safetensors found in its folder as a last resort
     if not pt_path:
@@ -164,7 +164,7 @@ def load_quantized(model_name):
         exit()
 
     # Find the quantized model weights file (.pt/.safetensors)
-    path_to_model = Path(shared.args['model_dir']+ os.sep + model_name)
+    path_to_model = Path(f"{shared.args['model_dir']}"+ os.sep + model_name)
     pt_path = find_quantized_model_file(model_name)
     if not pt_path:
         logger.error("Could not find the quantized model in .pt or .safetensors format, exiting...")
