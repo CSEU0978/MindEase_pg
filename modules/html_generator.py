@@ -10,6 +10,7 @@ from pathlib import Path
 import markdown
 from PIL import Image, ImageOps
 
+from modules import shared
 # This is to store the paths to the thumbnails of the profile pictures
 image_cache = {}
 
@@ -21,7 +22,7 @@ with open(Path(__file__).resolve().parent / '../frontend/ChatBotcss/html_instruc
     instruct_css = f.read()
 
 # modified chat styles setting to messenger
-chat_styles = open(Path(f'frontend/ChatBotcss/chat_style-messenger.css'), 'r').read()
+chat_styles = open(shared.args['chat_style']).read()
 
 def fix_newlines(string):
     string = string.replace('\n', '\n\n')

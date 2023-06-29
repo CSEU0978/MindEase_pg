@@ -395,22 +395,17 @@ if __name__ == "__main__":
         #shared.settings.update(model_settings)  # hijacking the interface defaults
         #update_model_parameters(model_settings, initial=True)  # hijacking the command-line arguments
         shared.settings.update(model_settings,initial=True)  # hijacking the interface defaults
-        
 
         # Load the model
         print ("model name is: " + shared.model_name)
         print (shared.model_config)
         shared.model, shared.tokenizer = load_model(shared.model_name)
-        if shared.args['lora']:
+        if shared.args['lora'] is not None:
             add_lora_to_model(shared.args['lora'])
+        else : 
+            print("No LoRAs selected for loading.")
 
-    # Force a character to be loaded
-    if shared.is_chat():
-        shared.persistent_interface_state.update({
-            'mode': shared.settings['mode'],
-            'character_menu': shared.args['character'] or shared.settings['character'],
-            'instruction_template': shared.settings['instruction_template']
-        })
+    # removed if shared.is_chat(): Force a character to be loaded
 
     shared.generation_lock = Lock()
     # Launch the web UI

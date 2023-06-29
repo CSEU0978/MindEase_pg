@@ -11,7 +11,6 @@ model = None
 tokenizer = None
 model_name = "pygmalion-6b_dev-4bit-128g.safetensors"
 model_type = 'gptj'
-lora_names = []
 soft_prompt_tensor = None
 soft_prompt = False
 
@@ -84,11 +83,15 @@ args =  {
         # Basic settings -x- removed 11 add args
         'notebook': False,         
         'chat': True,
+        'chat_style': Path("C:"+ os.sep +"Users"+ os.sep +"suran"+ os.sep +"Desktop"+ os.sep +"School"
+                           + os.sep +"MINDEASE_pg"+ os.sep +"MindEase_pg"+ os.sep +"frontend"+ os.sep +
+                           "ChatBotcss"+ os.sep +"chat_style-messenger.css"), # from frontend>chatbotcss
         'character': False,
         'model_dir': Path ("C:"+ os.sep +"Users"+ os.sep +"suran"+ os.sep +"text-generation-webui"+ os.sep +
                            "models"+ os.sep + "mayaeary_pygmalion-6b_dev-4bit-128g"
                            ),        # type=string
         'lora_dir': None,            # [], type=string nargs "+"
+        'lora': None,                  # type=string , nargs="+" , list of loras to load separated by spaces
         'model_menu': None,          # [], not required
         'no_stream': True,           # default=True , check that it only applies to stopping generation 
         'settings_file': None,       # directory of file that leads to settings.yaml or settings.json
@@ -98,7 +101,7 @@ args =  {
         # Accelerate/transformers -x- removed 11 add args
         'cpu':False,                 # toggle to use CPU ONLY to generate text
         'auto_devices': True,        # toggle to automatically split model between available GPUs and CPUs
-        'gpu_memory': '4',             # type=string , nargs="+" in GiB, alternatively can set in MiB like 3500MiB
+        'gpu_memory': '',             # type=string , nargs="+" in GiB, alternatively can set in MiB like 3500MiB
         'cpu_memory':'',             # type=string , same as above in GiB or MiB
         'disk': True,                # toggle for offloading remaining model layers to disk if model is too big -> creates disk cache on env creation and wipes it on termination
         'disk_cache_dir': 'cache',   # type=string , defaults to cache directory

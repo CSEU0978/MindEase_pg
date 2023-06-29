@@ -1,0 +1,9 @@
+To search any snippet of code not found by global search:
+
+1) open Git Bash 
+2) run command:
+    date; find . -type f -name "*.py" -print0 | xargs -0 -P 20 -n 1000 grep 'insert code snippet here' ; date
+
+    * you can change the value of -P and -n 
+            where P: number of parallel processes 
+            and N: number of threads created for search

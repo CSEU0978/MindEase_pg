@@ -31,7 +31,7 @@ sampler_hijack.hijack_samplers()
 # This function detects model name for def load_model 
 def find_model_type(model_name):
     path_to_model = Path(f"{shared.args['model_dir']}"+ os.sep + model_name)
-    print (path_to_model)
+    print(" path to model:  " , path_to_model)
     if not path_to_model.exists():
         return 'None'
     # convert model name to lowercase and resume search for model for def load_model
@@ -199,7 +199,7 @@ def huggingface_loader(model_name):
             params['device_map'] = infer_auto_device_map(
                 model,
                 dtype=torch.int8,
-                max_memory=params['max_memory'],
+                max_memory = params['max_memory'],
                 no_split_module_classes=model._no_split_modules
             )
 
