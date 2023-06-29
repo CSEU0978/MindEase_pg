@@ -29,8 +29,8 @@ except ImportError:
 
 try:
     from modelutils import find_layers 
-except ImportError:
-    from utils import find_layers
+except ImportError: #for triton branch
+    from utils import find_layers # for triton branch
 
 try:
     from quant import make_quant

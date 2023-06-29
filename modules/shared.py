@@ -98,7 +98,7 @@ args =  {
         # Accelerate/transformers -x- removed 11 add args
         'cpu':False,                 # toggle to use CPU ONLY to generate text
         'auto_devices': True,        # toggle to automatically split model between available GPUs and CPUs
-        'gpu_memory': 4,             # type=string , nargs="+" in GiB, alternatively can set in MiB like 3500MiB
+        'gpu_memory': '4',             # type=string , nargs="+" in GiB, alternatively can set in MiB like 3500MiB
         'cpu_memory':'',             # type=string , same as above in GiB or MiB
         'disk': True,                # toggle for offloading remaining model layers to disk if model is too big -> creates disk cache on env creation and wipes it on termination
         'disk_cache_dir': 'cache',   # type=string , defaults to cache directory
