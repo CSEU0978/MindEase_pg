@@ -317,7 +317,6 @@ def generate_reply_custom(question, original_question, seed, state, eos_token=No
         return
 
 
-
 def generate_reply_flexgen(question, original_question, seed, state, eos_token=None, stopping_strings=None, is_chat=False):
     generate_params = {}
     for k in ['max_new_tokens', 'do_sample', 'temperature']:
@@ -382,4 +381,3 @@ def generate_reply_flexgen(question, original_question, seed, state, eos_token=N
         new_tokens = len(output) - (original_tokens if shared.model_type != 'HF_seq2seq' else 0)
         print(f'Output generated in {(t1-t0):.2f} seconds ({new_tokens/(t1-t0):.2f} tokens/s, {new_tokens} tokens, context {original_tokens}, seed {seed})')
         return
-

@@ -22,7 +22,8 @@ with open(Path(__file__).resolve().parent / '../frontend/ChatBotcss/html_instruc
     instruct_css = f.read()
 
 # modified chat styles setting to messenger
-chat_styles = open(shared.args['chat_style']).read()
+chat_styles_dir = open(shared.args['chat_style_dir']).read()
+
 
 def fix_newlines(string):
     string = string.replace('\n', '\n\n')
@@ -141,7 +142,7 @@ def generate_instruct_html(history):
 
 
 def generate_cai_chat_html(history, name1, name2, style, reset_cache=False):
-    output = f'<style>{chat_styles[style]}</style><div class="chat" id="chat">'
+    output = f'<style>{chat_styles_dir}</style><div class="chat" id="chat">'
 
     # We use ?name2 and ?time.time() to force the browser to reset caches
     img_bot = f'<img src="file/cache/pfp_character.png?{name2}">' if Path("cache/pfp_character.png").exists() else ''
@@ -189,8 +190,8 @@ def generate_cai_chat_html(history, name1, name2, style, reset_cache=False):
     return output
 
 
-def generate_chat_html(history, name1, name2, reset_cache=False):
-    output = f'<style>{chat_styles["messenger"]}</style><div class="chat" id="chat">'
+def generate_chat_html(history, name1, name2, style, reset_cache=False):
+    output = f'<style>{chat_styles_dir}</style><div class="chat" id="chat">'
 
     for i, _row in enumerate(history[::-1]):
         row = [convert_to_markdown(entry) for entry in _row]
@@ -223,9 +224,12 @@ def generate_chat_html(history, name1, name2, reset_cache=False):
 
 
 def chat_html_wrapper(history, name1, name2, mode, style, reset_cache=False):
-  #  if mode == 'instruct':
-  #      return generate_instruct_html(history)
-    if style == 'messenger':
-        return generate_chat_html(history, name1, name2)
-    else:
+  if mode == 'chat' and style =='html':
+    return generate_chat_html(history,name1,name2,style)
+  elif mode == 'instruct':
+    return generate_instruct_html(history)
+  elif mode == 'chat' and style == 'messenger':
         return generate_cai_chat_html(history, name1, name2, style, reset_cache)
+  #else:
+  #      return generate_cai_chat_html(history, name1, name2, style, reset_cache)
+

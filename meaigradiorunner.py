@@ -58,8 +58,15 @@ def load_lora_wrapper(selected_loras):
     add_lora_to_model(selected_loras)
     yield ("Successfuly applied the LoRAs")
 
-# removed def load_preset_values function to load parameters manually
-    # removed 3 functions to set params from presets menu
+
+def load_preset_values( return_dict=False):
+    print("here 1 ")
+    generate_params = {}
+    print("here 2")
+    for k in shared.generate_params:
+        print (k)
+        generate_params[k] = shared.generate_params[k]
+        print (generate_params)
 
 # nudges the model towards direction of specific responses. inject additional context and steer the model's language generation
 def upload_soft_prompt(file):
@@ -166,9 +173,9 @@ def create_interface():
 
     # Defining some variables
     gen_events = []
-    default_preset = shared.settings['preset']
-    default_text = load_prompt(shared.settings['prompt'])
-    title = 'Text generation web UI'
+    default_preset = (load_preset_values() if not shared.args['flexgen'] else 'Naive') 
+    #default_text = load_prompt(shared.settings['prompt'])
+    title = 'MindEaseAi : meAI'
 
     # Authentication variables
     auth = None
@@ -193,6 +200,12 @@ def create_interface():
     css += apply_extensions('css')
     js += apply_extensions('js')
 
+    # Gradio Array to prevent KeyErrors
+    for k in shared.settings:
+        shared.gradio[k] = shared.settings[k]
+
+    # removed generate_params = load_preset_values(default_preset if not shared.args['flexgen'] else 'Naive' , return_dict=True)
+
     with gr.Blocks(css=css, analytics_enabled=False, title=title, theme=ui.theme) as shared.gradio['interface']:
         if Path("notification.mp3").exists():
             shared.gradio['audio_notification'] = gr.Audio(interactive=False, value="notification.mp3", elem_id="audio_notification", visible=False)
@@ -208,23 +221,25 @@ def create_interface():
             #shared.gradio['dummy'] = gr.State()
 
             with gr.Tab('Text generation', elem_id='main'):
-                shared.gradio['display'] = gr.HTML(value=chat_html_wrapper(shared.history['visible'], shared.settings['name1'], shared.settings['name2'], 'chat', 'cai-chat'))
+                shared.gradio['display'] = gr.HTML(value=chat_html_wrapper(shared.history['visible'], shared.gradio['name1'], shared.gradio['name2'], shared.gradio['mode'], shared.gradio['chat_style']))
                 shared.gradio['textbox'] = gr.Textbox(label='Input')
                 with gr.Row():
                     shared.gradio['Stop'] = gr.Button('Stop', elem_id='stop')
                     shared.gradio['Generate'] = gr.Button('Generate', elem_id='Generate', variant='primary')
                     shared.gradio['Continue'] = gr.Button('Continue')
 
-           # removed 2 gr.row() for impersonate, regenerate, remove last, copy and replace last reply, dummy message, dummy reply, 
+                # removed 2 gr.row() for impersonate, regenerate, remove last,
+                
+                # removed copy last reply, replace last reply, dummy message, dummy reply, 
 
                 with gr.Row():
                     shared.gradio['Clear history'] = gr.Button('Clear history')
                     shared.gradio['Clear history-confirm'] = gr.Button('Confirm', variant='stop', visible=False)
                     shared.gradio['Clear history-cancel'] = gr.Button('Cancel', visible=False)
 
-           # removed gr.row() for "start reply with: 'sure thing!' "
+                # removed gr.row() for "start reply with: 'sure thing!' "
             
-           # removed gr.Row() for chat mode(chat,chat-instruct,instruct) and chat_Style 
+                # removed gr.Row() for mode(chat,chat-instruct,instruct) and chat_Style 
             
            # removed gr.Tab() for chat settings(character, context, greeting, instruction template, etc)
 
@@ -410,6 +425,7 @@ if __name__ == "__main__":
     shared.generation_lock = Lock()
     # Launch the web UI
     create_interface()
+''' # removed restart interface
     while True:
         time.sleep(0.5)
         if shared.need_restart:
@@ -418,3 +434,4 @@ if __name__ == "__main__":
             shared.gradio['interface'].close()
             time.sleep(0.5)
             create_interface()
+'''

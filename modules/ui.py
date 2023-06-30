@@ -41,12 +41,11 @@ def list_model_elements():
 
 
 def list_interface_input_elements(chat=False):
-    elements = [ 'max_new_tokens', 'seed','temperature', 'top_p', 'top_k', 'typical_p', 'epsilon_cutoff', 
+    elements = [ 'max_new_tokens', 'seed', 'temperature', 'top_p', 'top_k', 'typical_p', 'epsilon_cutoff', 
                 'eta_cutoff', 'repetition_penalty', 'encoder_repetition_penalty', 'no_repeat_ngram_size',
                   'min_length', 'do_sample', 'penalty_alpha', 'num_beams', 'length_penalty', 'early_stopping',
                     'mirostat_mode', 'mirostat_tau', 'mirostat_eta', 'add_bos_token', 'ban_eos_token', 
-                    'truncation_length', 'custom_stopping_strings', 'skip_special_tokens', 'preset_menu',
-                      'stream', 'tfs', 'top_a'] 
+                    'truncation_length', 'custom_stopping_strings', 'skip_special_tokens', 'stream', 'tfs', 'top_a'] 
     if chat:
         elements += ['name1', 'name2', 'greeting', 'context', 'chat_prompt_size', 'chat_generation_attempts',
                       'stop_at_newline', 'mode', 'instruction_template', 'character_menu', 'name1_instruct', 
@@ -58,7 +57,7 @@ def list_interface_input_elements(chat=False):
 
 def gather_interface_values(*args):
     output = {}
-    for i, element in enumerate(shared.input_elements):
+    for i, element in enumerate(shared.generate_params):
         output[element] = args[i]
 
     shared.persistent_interface_state = output
