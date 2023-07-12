@@ -21,7 +21,7 @@ sys.path.insert(0, str(gptq_repo_dir))
 
 #removed llama inference offload -> leading to "triton not installed." error
 try:
-    import llama_inference_offload
+    import llama_inference_offload 
 except ImportError:
     logger.error('Failed to load GPTQ-for-LLaMa')
     logger.error('See https://github.com/oobabooga/text-generation-webui/blob/main/docs/GPTQ-models-(4-bit-mode).md')

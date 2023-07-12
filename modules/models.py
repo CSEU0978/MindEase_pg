@@ -30,7 +30,7 @@ sampler_hijack.hijack_samplers()
 # Some models require special treatment in various parts of the code.
 # This function detects model name for def load_model 
 def find_model_type(model_name):
-    path_to_model = Path(f"{shared.args['model_dir']}"+ os.sep + model_name)
+    path_to_model = Path(str(shared.args['model_dir']) + os.sep + shared.model_name)
     print(" path to model:  " , path_to_model)
     if not path_to_model.exists():
         return 'None'
