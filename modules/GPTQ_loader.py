@@ -1,6 +1,7 @@
 import inspect
 import re
 import sys
+import time
 from pathlib import Path
 import os
 
@@ -59,7 +60,7 @@ def _load_quant(model, checkpoint, wbits, groupsize=-1, faster_kernel=False, exc
     model = AutoModelForCausalLM.from_config(config, trust_remote_code=shared.args['trust_remote_code'])
     torch.set_default_dtype(torch.float)
     if eval:
-        model = model.eval()
+        model = model.eval() 
 
     layers = find_layers(model)
     for name in exclude_layers:
@@ -84,15 +85,19 @@ def _load_quant(model, checkpoint, wbits, groupsize=-1, faster_kernel=False, exc
         make_quant(**make_quant_kwargs)
     else:
         quant.make_quant_linear(model, layers, wbits, groupsize)
-
+    logger.info("Loading model from gptq_loader... ")
+    
     del layers
     if checkpoint.endswith('.safetensors'):
         from safetensors.torch import load_file as safe_load
-        model.load_state_dict(safe_load(checkpoint), strict=False)
+        print ("in safetensors in gptq_loader")
+        time.sleep(10)
+        model.load_state_dict(safe_load(checkpoint), False)
+        print("loading checkpoints")
     else:
-        model.load_state_dict(torch.load(checkpoint), strict=False)
-
-    if is_triton ==True :
+        model.load_state_dict(torch.load(checkpoint), False)
+    
+    if is_triton:
         if shared.args['quant_attn']:
             quant.make_quant_attn(model)
 
@@ -103,7 +108,7 @@ def _load_quant(model, checkpoint, wbits, groupsize=-1, faster_kernel=False, exc
             quant.autotune_warmup_linear(model, transpose=not eval)
             if eval and shared.args['fused_mlp']:
                 quant.autotune_warmup_fused(model)
-
+    logger.info("Done")
     model.seqlen = 2048
     return model
 

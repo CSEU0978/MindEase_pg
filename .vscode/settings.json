@@ -1,5 +1,6 @@
 {
     "python.analysis.extraPaths": [
         "./repositories/GPTQ-for-LLaMa-cuda"
-    ]
+    ],
+    "python.analysis.typeCheckingMode": "off"
 }

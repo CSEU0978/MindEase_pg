@@ -51,6 +51,19 @@ from modules.text_generation import (#generate_reply_wrapper,
                                         get_encoded_length,
                                         stop_everything_event)
 
+# Torch Cuda Sanity checks 
+if torch.cuda.is_available:
+    print ("\n Cuda is enabled")
+    print ("\n Cuda Device Count is :", torch.cuda.device_count())
+    print ("\n Cuda Device Name :", torch.cuda.get_device_name())
+    print ("\n Cuda Device Compute Capability :", torch.cuda.get_device_capability())
+    print ("\n Cuda is initialized: ", torch.cuda.is_initialized())
+    print ("\n")
+elif not torch.cuda.is_initialized:
+    print("Cuda is not initialised")
+else:
+    print("Cuda is DISABLED")
+
 # removed def load_model_wrapper function related to model loading, loading error if no model, updating settings for manual load
 
 def load_lora_wrapper(selected_loras):

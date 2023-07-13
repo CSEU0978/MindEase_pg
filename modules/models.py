@@ -136,9 +136,7 @@ def huggingface_loader(model_name):
         LoaderClass = AutoModelForCausalLM
 
     if (torch.cuda.is_available):
-        params = {
-            "b"
-        }
+        params = {}
     # Load the model in simple 16-bit mode by default
     if not any([shared.args['cpu'], shared.args['load_in_8bit'], shared.args['load_in_4bit'], shared.args['auto_devices'], shared.args['disk'], shared.args['deepspeed'], shared.args['gpu_memory'] is not None, shared.args['cpu_memory'] is not None]):
         model = LoaderClass.from_pretrained(Path(f"{shared.args['model_dir']}"+ os.sep +"{model_name}"), low_cpu_mem_usage=True, torch_dtype=torch.bfloat16 if shared.args['bf16'] else torch.float16, trust_remote_code=shared.args['trust_remote_code'])
@@ -254,7 +252,7 @@ def GPTQ_loader(model_name):
     # removed the Monkey patch for loading LoRAs for GPTQ - uses load_model_llama
     import modules.GPTQ_loader
     model = modules.GPTQ_loader.load_quantized(model_name)
-
+    # model.tie_weights()
     return model
 
 # removed AutoGPTQ_loader(model_name):
