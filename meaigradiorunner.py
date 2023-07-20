@@ -283,7 +283,7 @@ def create_interface():
                     value=chat_html_wrapper(shared.history['visible'], shared.gradio['name1'], shared.gradio['name2'],
                                             shared.gradio['mode'], shared.gradio['chat_style']))
 
-                shared.gradio['textbox'] = gr.Textbox(label='Input')
+                shared.gradio['textbox'] = gr.Textbox(label='Input', elem_id='textbox')
 
                 with gr.Row():
                     shared.gradio['Stop'] = gr.Button('Stop', elem_id='stop')
@@ -311,6 +311,30 @@ def create_interface():
                 # removed Model tab
                 # removed Training tab
                 # removed Interface mode tab
+        with gr.Tab("Interface mode", elem_id="interface-mode"):
+            modes = ["chat"]
+            current_mode = "chat"
+            for mode in modes[1:]:
+                if getattr(shared.args, mode):
+                    current_mode = mode
+                    break
+
+            cmd_list = shared.args | shared.generate_params | shared.settings
+            bool_list = sorted(
+                [k for k in cmd_list if type(cmd_list[k]) is bool and k not in modes + ui.list_model_elements()])
+            bool_active = [k for k in bool_list if vars(shared.args)[k]]
+
+            with gr.Row():
+                shared.gradio['interface_modes_menu'] = gr.Dropdown(choices=modes, value=current_mode, label="Mode")
+                shared.gradio['toggle_dark_mode'] = gr.Button('Toggle dark/light mode', elem_classes="small-button")
+
+            shared.gradio['extensions_menu'] = gr.CheckboxGroup(choices=utils.get_available_extensions(),
+                                                                value=shared.args.extensions,
+                                                                label="Available extensions",
+                                                                info='Note that some of these extensions may require manually installing Python requirements through the command: pip install -r extensions/extension_name/requirements.txt')
+            shared.gradio['bool_menu'] = gr.CheckboxGroup(choices=bool_list, value=bool_active,
+                                                          label="Boolean command-line flags")
+            shared.gradio['reset_interface'] = gr.Button("Apply and restart the interface")
 
         # chat mode event handlers
         if shared.is_chat():
