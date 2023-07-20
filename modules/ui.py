@@ -39,7 +39,6 @@ def list_model_elements():
 
     return elements
 
-
 def list_interface_input_elements(chat=False):
     elements = [ 'max_new_tokens', 'seed', 'temperature', 'top_p', 'top_k', 'typical_p', 'epsilon_cutoff', 
                 'eta_cutoff', 'repetition_penalty', 'encoder_repetition_penalty', 'no_repeat_ngram_size',
@@ -48,12 +47,10 @@ def list_interface_input_elements(chat=False):
                     'truncation_length', 'custom_stopping_strings', 'skip_special_tokens', 'stream', 'tfs', 'top_a'] 
     if chat:
         elements += ['name1', 'name2', 'greeting', 'context', 'chat_prompt_size', 'chat_generation_attempts',
-                      'stop_at_newline', 'mode', 'instruction_template', 'character_menu', 'name1_instruct', 
-                      'name2_instruct', 'context_instruct', 'turn_template', 'chat_style', 'chat-instruct_command']
-
+                      'stop_at_newline', 'mode', 'instruction_template', 'turn_template', 'chat_style']
+                    # removed 'character_menu', 'name1_instruct', 'name2_instruct', 'context_instruct', 'chat-instruct_command'
     elements += list_model_elements()
     return elements
-
 
 def gather_interface_values(*args):
     output = {}
@@ -87,9 +84,6 @@ class ToolButton(gr.Button, gr.components.FormComponent):
 
 # removed def create_refresh_button(refresh_component, refresh_method, refreshed_args, elem_id):
 
-
 # removed def create_delete_button(**kwargs):
-
-
 
 # removed def create_save_button(**kwargs):

@@ -95,21 +95,22 @@ args =  {
         'model_menu': None,          # [], not required
         'no_stream': True,           # default=True , check that it only applies to stopping generation 
         'settings_file': None,       # directory of file that leads to settings.yaml or settings.json
-        'extensions': [],            # type=str, nargs="+"
+        'extensions': None,          # type=[str], nargs="+", is a dictionary
         'verbose': True,             # toggle to print prompts to terminal
 
         # Accelerate/transformers -x- removed 11 add args
         'cpu':False,                 # toggle to use CPU ONLY to generate text
         'auto_devices': True,        # toggle to automatically split model between available GPUs and CPUs
-        'gpu_memory': '6GiB',     # type=string , nargs="+" in GiB, alternatively can set in MiB like 3500MiB
-        'cpu_memory':'',             # type=string , same as above in GiB or MiB
+        'gpu_memory': '4000MiB',     # type=string , in GiB, alternatively can set in MiB like 3500MiB
+        'gpu_memory_secondary': None,
+        'cpu_memory': None,          # type=string , same as above in GiB or MiB
         'disk': True,                # toggle for offloading remaining model layers to disk if model is too big -> creates disk cache on env creation and wipes it on termination
         'disk_cache_dir': 'cache',   # type=string , defaults to cache directory
         'load_in_8bit': False,       # toggle for 8-bit precision using BitsandBytes 
         'bf16': False,               # toggle for bloat16 precision, NVIDIA Ampere GPU required
         'no_cache': False,           # toggle for no caching, reduces VRAM usage
-      # 'xformers': False,           # memory efficient attention, miniscule increase in tokens/s -> needs explicit imports and installation of xformers
-      # 'sdp_attention': False,      # torch 2.0 sdp attention for llama_attn_hijack -> use with xformers to marginally increase tokens/s
+#       'xformers': False,           # memory efficient attention, miniscule increase in tokens/s -> needs explicit imports and installation of xformers
+#       'sdp_attention': False,      # torch 2.0 sdp attention for llama_attn_hijack -> use with xformers to marginally increase tokens/s
         'trust_remote_code': False,  # toggle for loading ChatGLM and Falcon models
 
         # Accelerate 4-bit -x- removed 4 add args

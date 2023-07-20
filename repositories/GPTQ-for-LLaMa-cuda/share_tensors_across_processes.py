@@ -17,7 +17,7 @@ def load_checkpoint_shared_and_dispatch(model, checkpoint, device_map = 'auto', 
                 os.kill(shared['pid'], 0) # raises if pid does not exist
                 device_map = shared['device_map']
                 #offload_dir = shared['offload_folder']
-                #offload_buffers = shared['offload_buyffers']
+                #offload_buffers = shared['offload_buffers']
                 #preload_module_classes = shared['preload_module_classes']
                 state_dict = {
                     name: rebuild_tensor(*tensor_params)

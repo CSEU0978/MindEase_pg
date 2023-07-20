@@ -91,7 +91,7 @@ def _load_quant(model, checkpoint, wbits, groupsize=-1, faster_kernel=False, exc
     if checkpoint.endswith('.safetensors'):
         from safetensors.torch import load_file as safe_load
         print ("in safetensors in gptq_loader")
-        time.sleep(10)
+        time.sleep(7)
         model.load_state_dict(safe_load(checkpoint), False)
         print("loading checkpoints")
     else:
@@ -188,17 +188,28 @@ def load_quantized(model_name):
     else:
         threshold = False if model_type == 'gptj' else 128
         model = load_quant(str(path_to_model), str(pt_path), shared.args['wbits'], shared.args['groupsize'], kernel_switch_threshold=threshold)
-
+        # model.
         # accelerate offload (doesn't work properly)
         if shared.args['gpu_memory'] or torch.cuda.device_count() > 1:
-            if shared.args['gpu_memory']:
-                memory_map = list(map(lambda x: x.strip(), shared.args['gpu_memory']))
-                max_cpu_memory = shared.args['cpu_memory'].strip() if shared.args['cpu_memory'] is not None else '99GiB'
-                max_memory = {}
-                for i in range(len(memory_map)):
-                    max_memory[i] = f'{memory_map[i]}GiB' if not re.match('.*ib$', memory_map[i].lower()) else memory_map[i]
+            max_memory = {}
+            if shared.args['gpu_memory'] is not None:
+                # memory_map = list(map(lambda x: x.strip(), shared.args['gpu_memory']))
+                mem_conversion = accelerate.utils.convert_file_size_to_int(shared.args['gpu_memory'])
+                max_memory.update({'gpu_memory': mem_conversion})
+                if shared.args['gpu_memory_secondary'] is not None:
+                    mem_conversion_secondary = accelerate.utils.convert_file_size_to_int(shared.args['gpu_memory_secondary'])
+                    max_memory.update({'gpu_memory_secondary': mem_conversion_secondary})
+                if shared.args['cpu_memory'] is not None:
+                    mem_conversion_cpu = accelerate.utils.convert_file_size_to_int(shared.args['cpu_memory'])
+                    max_memory.update({'cpu': mem_conversion_cpu})
+                else:
+                    mem_conversion_cpu = accelerate.utils.convert_file_size_to_int('99GiB')
+                    max_memory.update({'cpu': mem_conversion_cpu})
+                # max_cpu_memory = shared.args['cpu_memory'].strip() if shared.args['cpu_memory'] is not None else '99GiB' #need to fix this code
+                # max_memory[i] = f'{memory_map[i]}' if not re.match('.*ib$', memory_map[i].lower()) else memory_map[i]
 
-                max_memory['cpu'] = f'{max_cpu_memory}GiB' if not re.match('.*ib$', max_cpu_memory.lower()) else max_cpu_memory
+                # max_memory['cpu'] = f'{max_cpu_memory}' if not re.match('.*ib$', max_cpu_memory.lower()) else max_cpu_memory #need to fix this code
+                print (max_memory)
             else:
                 max_memory = accelerate.utils.get_balanced_memory(model)
 
