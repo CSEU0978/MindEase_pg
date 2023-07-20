@@ -98,7 +98,7 @@ def load_preset_values(state, return_dict=False):
     else: 'Naive'
     print(shared.gradio)
     #state.update(generate_params)
-    return generate_params#, state
+    return generate_params #, state
 
 
 # nudges the model towards direction of specific responses. inject additional context and steer the model's language generation
@@ -137,10 +137,9 @@ def count_tokens(text):
 
 
 # removed function def download_model_wrapper(repo_id): to download additional models
-
 # removed function def update_model_parameters(state, initial=False): which updated command line arguments based on interface values
-
 # gets model settings from shared file for modelspecific or userspecific settings
+
 def get_model_specific_settings(model):
     settings = shared.model_config
     model_settings = {}
@@ -164,13 +163,12 @@ def load_model_specific_settings(model, state, return_dict=False):
 
 
 # removed def save_model_settings(model,state): as users will not be saving model settings
-
 # removed def create_model_menus(): gradio page where you select the model, define gpu,cpu mem, loading settings autogptq,llama,transformers,etc
-
 # removed def create_settings_menu(default_preset): parameter tuning menu with the top_k, top_p, temp, repetition values
-def settings_menu(state):
+'''
+def settings_menu(state, default_preset):
     generate_params = load_preset_values(state, return_dict=True)
-    # Main parameters
+ # Main parameters
     shared.gradio['seed'] = gr.State({'seed': shared.settings['seed']})
     shared.gradio['temperature'] = gr.State({'temperature': shared.generate_params['temperature']})
     shared.gradio['top_p'] = gr.State({'top_p': shared.generate_params['top_p']})
@@ -206,35 +204,19 @@ def settings_menu(state):
 
     shared.gradio['ban_eos_token'] = gr.State({'ban_eos_token': shared.settings['ban_eos_token']})
     shared.gradio['add_bos_token'] = gr.State({'add_bos_token': shared.settings['add_bos_token']})
-
     shared.gradio['skip_special_tokens'] = gr.State({'skip_special_tokens': shared.settings['skip_special_tokens']})
+    
     shared.gradio['stream'] = gr.State({'stream': True})
+'''
 
 # function to set interface mode
-def set_interface_arguments(interface_mode, extensions, bool_active):
-    modes = "chat"  # removed default, notebook and cai-chat modes
-    cmd_list = vars(shared.args)
-    bool_list = [k for k in cmd_list if type(cmd_list[k]) is bool and k not in modes]
-
-    shared.args['extensions'] = extensions
-    for k in modes[1:]:
-        setattr(shared.args[k], k, False)
-    if interface_mode != "default":
-        setattr(shared.args, interface_mode, True)
-
-    for k in bool_list:
-        setattr(shared.args[k], k, False)
-    for k in bool_active:
-        setattr(shared.args[k], k, True)
-
-    shared.need_restart = True
-
+# removed def set_interface_arguments(interface_mode, extensions, bool_active):
 
 # extensive modification done to def create_interface(): refer to source code
 def create_interface():
     # Defining some variables
     gen_events = []
-    default_preset = shared.settings['preset']
+    # default_preset = shared.settings | shared.generate_params
     # default_text = load_prompt(shared.settings['prompt'])
     title = 'MindEaseAi : meAI'
 
@@ -279,7 +261,7 @@ def create_interface():
         # Create chat mode interface
         if shared.is_chat():
 
-            input_elements = ui.list_interface_input_elements(chat=True)
+            #shared.input_elements = ui.list_interface_input_elements(chat=True)
 
             '''shared.input_elements = shared.args | shared.settings
             removals = {'notebook', 'chat', 'chat_style_dir', 'character', 'model_dir', 'lora_dir', 'lora',
@@ -292,8 +274,7 @@ def create_interface():
             for k in removals:
                 shared.input_elements.pop(k)
             '''
-            print(input_elements)
-            shared.gradio['interface_state'] = gr.State({k: None for k in input_elements})
+            shared.gradio['interface_state'] = gr.State({k: None for k in shared.input_elements})
             shared.gradio['Chat input'] = gr.State()
             # shared.gradio['dummy'] = gr.State()
 
@@ -301,14 +282,15 @@ def create_interface():
                 shared.gradio['display'] = gr.HTML(
                     value=chat_html_wrapper(shared.history['visible'], shared.gradio['name1'], shared.gradio['name2'],
                                             shared.gradio['mode'], shared.gradio['chat_style']))
+
                 shared.gradio['textbox'] = gr.Textbox(label='Input')
+
                 with gr.Row():
                     shared.gradio['Stop'] = gr.Button('Stop', elem_id='stop')
                     shared.gradio['Generate'] = gr.Button('Generate', elem_id='Generate', variant='primary')
                     shared.gradio['Continue'] = gr.Button('Continue')
 
                 # removed 2 gr.row() for impersonate, regenerate, remove last,
-
                 # removed copy last reply, replace last reply, dummy message, dummy reply, 
 
                 with gr.Row():
@@ -317,22 +299,17 @@ def create_interface():
                     shared.gradio['Clear history-cancel'] = gr.Button('Cancel', visible=False)
 
                 # removed gr.row() for "start reply with: 'sure thing!' "
-
-                # removed gr.Row() for mode(chat,chat-instruct,instruct) and chat_Style 
-
+                # removed gr.Row() for mode(chat,chat-instruct,instruct) and chat_Style
                 # removed gr.Tab() for chat settings(character, context, greeting, instruction template, etc)
 
              # removed gr.Tab() for parameters tab
              #state = shared.persistent_interface_state
-            settings_menu(default_preset)
+             # settings_menu(default_preset)
 
                 # removed notebook mode interface
                 # removed default mode interface
-
                 # removed Model tab
-
                 # removed Training tab
-
                 # removed Interface mode tab
 
         # chat mode event handlers
@@ -342,18 +319,16 @@ def create_interface():
             shared.reload_inputs = [shared.gradio[k] for k in ['name1', 'name2', 'mode', 'chat_style']]
 
             gen_events.append(shared.gradio['Generate'].click(
-                print(shared.gradio),
-                input_elements, shared.gradio['interface_state']).then(
-                lambda x: (x, ''), shared.gradio['textbox'], [shared.gradio['Chat input'], shared.gradio['textbox']],
-                show_progress=False).then(
-                chat.generate_chat_reply_wrapper, shared.input_params, shared.gradio['display'],
-                show_progress=False).then(
+                print("shared.gradio from gen_events_append generate", shared.gradio),
+                shared.gradio['interface_state']).then(
+                lambda x: (x, ''), shared.gradio['textbox'], [shared.gradio['Chat input'], shared.gradio['textbox']], show_progress=False).then(
+                chat.generate_chat_reply_wrapper, shared.input_params, shared.gradio['display'], show_progress=False).then(
                 chat.save_history, shared.gradio['mode'], None, show_progress=False).then(
                 lambda: None, None, None, _js=f"() => {{{audio_notification_js}}}")
             )
 
             gen_events.append(shared.gradio['textbox'].submit(
-                ui.gather_interface_values, [shared.gradio[k] for k in input_elements], shared.gradio['interface_state']).then(
+                shared.gradio['interface_state']).then(
                 lambda x: (x, ''), shared.gradio['textbox'], [shared.gradio['Chat input'], shared.gradio['textbox']],
                 show_progress=False).then(
                 chat.generate_chat_reply_wrapper, shared.input_params, shared.gradio['display'],
@@ -365,7 +340,7 @@ def create_interface():
             # removed gen_events.append(shared.gradio['Regenerate'].click()
 
             gen_events.append(shared.gradio['Continue'].click(
-                ui.gather_interface_values, [shared.gradio[k] for k in input_elements], shared.gradio['interface_state']).then(
+                shared.gradio['interface_state']).then(
                 partial(chat.generate_chat_reply_wrapper, _continue=True), shared.input_params,
                 shared.gradio['display'], show_progress=False).then(
                 chat.save_history, shared.gradio['mode'], None, show_progress=False).then(
@@ -413,11 +388,9 @@ def create_interface():
             shared.gradio['interface'].load(lambda: None, None, None,
                                             _js="() => document.getElementsByTagName('body')[0].classList.add('dark')")
 
-        shared.gradio['interface'].load(partial(ui.apply_interface_values, {} , use_persistent = True), None,
-                                        [shared.gradio[k] for k in ui.list_interface_input_elements(chat=shared.is_chat())], show_progress=False)
+        shared.gradio['interface'].load(partial(ui.apply_interface_values, {}, use_persistent=True), None, show_progress=False)
 
         # removed Extensions tabs
-
         # removed Extensions block
 
     # Launch the interface
@@ -450,13 +423,14 @@ if __name__ == "__main__":
             file_contents)
         for item in new_settings:
             shared.settings[item] = new_settings[item]
-    else:
-        shared.settings
+
 
     # shared.model_config.move_to_end('.*', last=False)  # Move to the beginning
 
     # Default extensions modified - for no exts usage. 
     # imported get_available_extensions(), def natural_keys(text) and def atoi(text): from utils.py
+
+
     def atoi(text):
         return int(text) if text.isdigit() else text.lower()
 

@@ -36,10 +36,11 @@ def list_model_elements():
                    'n_ctx', 'llama_cpp_seed']
     for i in range(torch.cuda.device_count()):
         elements.append(f'gpu_memory_{i}')
-
+    elements += list_model_setting_elements()
     return elements
 
-def list_interface_input_elements(chat=False):
+
+def list_model_setting_elements(chat=True):
     elements = [ 'max_new_tokens', 'seed', 'temperature', 'top_p', 'top_k', 'typical_p', 'epsilon_cutoff', 
                 'eta_cutoff', 'repetition_penalty', 'encoder_repetition_penalty', 'no_repeat_ngram_size',
                   'min_length', 'do_sample', 'penalty_alpha', 'num_beams', 'length_penalty', 'early_stopping',
@@ -52,7 +53,13 @@ def list_interface_input_elements(chat=False):
     elements += list_model_elements()
     return elements
 
-def gather_interface_values(*args):
+
+def list_interface_input_elements(chat=True):
+    elements = []
+    return elements
+
+
+def gather_interface_values(*args: object) -> object:
     output = {}
     for i, element in enumerate(shared.generate_params):
         output[element] = args[i]
@@ -61,11 +68,33 @@ def gather_interface_values(*args):
     return output
 
 
-def apply_interface_values(state, use_persistent=False):
+def apply_interface_values(state, use_persistent=True):
     if use_persistent:
         state = shared.persistent_interface_state
 
-    elements = list_interface_input_elements(chat=shared.is_chat())
+    elements = {'max_new_tokens', 'seed', 'temperature', 'top_p', 'top_k', 'typical_p', 'epsilon_cutoff',
+                'eta_cutoff', 'repetition_penalty', 'encoder_repetition_penalty', 'no_repeat_ngram_size',
+                'min_length', 'do_sample', 'penalty_alpha', 'num_beams', 'length_penalty', 'early_stopping',
+                'mirostat_mode', 'mirostat_tau', 'mirostat_eta', 'add_bos_token', 'ban_eos_token',
+                'truncation_length', 'custom_stopping_strings', 'skip_special_tokens', 'stream', 'tfs', 'top_a',
+                'name1', 'name2', 'greeting', 'context', 'chat_prompt_size', 'chat_generation_attempts',
+                'stop_at_newline', 'mode', 'instruction_template', 'turn_template', 'chat_style',
+                'character_menu', 'name1_instruct', 'name2_instruct', 'context_instruct', 'chat-instruct_command'
+                }
+
+    for key, value in shared.generate_params:
+        if key == elements[key]:
+            elements[key] = shared.generate_params[key]
+
+    for key, value in shared.args:
+        if key == elements[key]:
+            elements[key] = shared.args[key]
+
+    for key, value in shared.settings:
+        if key == elements[key]:
+            elements[key] = shared.settings[key]
+
+    print("elements from apply interface values", elements)
     if len(state) == 0:
         return [gr.update() for k in elements]  # Dummy, small brain, do nothing
     else:
@@ -83,7 +112,5 @@ class ToolButton(gr.Button, gr.components.FormComponent):
 
 
 # removed def create_refresh_button(refresh_component, refresh_method, refreshed_args, elem_id):
-
 # removed def create_delete_button(**kwargs):
-
 # removed def create_save_button(**kwargs):
