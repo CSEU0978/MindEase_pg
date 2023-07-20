@@ -91,7 +91,7 @@ def _load_quant(model, checkpoint, wbits, groupsize=-1, faster_kernel=False, exc
     if checkpoint.endswith('.safetensors'):
         from safetensors.torch import load_file as safe_load
         print ("in safetensors in gptq_loader")
-        time.sleep(7)
+        time.sleep(10)
         model.load_state_dict(safe_load(checkpoint), False)
         print("loading checkpoints")
     else:

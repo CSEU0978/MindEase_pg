@@ -319,19 +319,15 @@ def create_interface():
                     current_mode = mode
                     break
 
-            cmd_list = shared.args | shared.generate_params | shared.settings
+            cmd_list = shared.args
             bool_list = sorted(
                 [k for k in cmd_list if type(cmd_list[k]) is bool and k not in modes + ui.list_model_elements()])
-            bool_active = [k for k in bool_list if vars(shared.args)[k]]
+            bool_active = [k for k in bool_list if shared.args[k]]
 
             with gr.Row():
                 shared.gradio['interface_modes_menu'] = gr.Dropdown(choices=modes, value=current_mode, label="Mode")
                 shared.gradio['toggle_dark_mode'] = gr.Button('Toggle dark/light mode', elem_classes="small-button")
 
-            shared.gradio['extensions_menu'] = gr.CheckboxGroup(choices=utils.get_available_extensions(),
-                                                                value=shared.args.extensions,
-                                                                label="Available extensions",
-                                                                info='Note that some of these extensions may require manually installing Python requirements through the command: pip install -r extensions/extension_name/requirements.txt')
             shared.gradio['bool_menu'] = gr.CheckboxGroup(choices=bool_list, value=bool_active,
                                                           label="Boolean command-line flags")
             shared.gradio['reset_interface'] = gr.Button("Apply and restart the interface")
@@ -342,10 +338,13 @@ def create_interface():
             clear_arr = [shared.gradio[k] for k in ['Clear history-confirm', 'Clear history', 'Clear history-cancel']]
             shared.reload_inputs = [shared.gradio[k] for k in ['name1', 'name2', 'mode', 'chat_style']]
 
+            def function(x):
+                return (x, '')
+
             gen_events.append(shared.gradio['Generate'].click(
                 print("shared.gradio from gen_events_append generate", shared.gradio),
                 shared.gradio['interface_state']).then(
-                lambda x: (x, ''), shared.gradio['textbox'], [shared.gradio['Chat input'], shared.gradio['textbox']], show_progress=False).then(
+                function, shared.gradio['textbox'], [shared.gradio['Chat input'], shared.gradio['textbox']], show_progress=False).then(
                 chat.generate_chat_reply_wrapper, shared.input_params, shared.gradio['display'], show_progress=False).then(
                 chat.save_history, shared.gradio['mode'], None, show_progress=False).then(
                 lambda: None, None, None, _js=f"() => {{{audio_notification_js}}}")

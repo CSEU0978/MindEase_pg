@@ -36,7 +36,7 @@ def list_model_elements():
                    'n_ctx', 'llama_cpp_seed']
     for i in range(torch.cuda.device_count()):
         elements.append(f'gpu_memory_{i}')
-    elements += list_model_setting_elements()
+
     return elements
 
 

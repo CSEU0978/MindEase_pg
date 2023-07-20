@@ -105,7 +105,7 @@ args =  {
         'gpu_memory': '4000MiB',     # type=string , in GiB, alternatively can set in MiB like 3500MiB
         'gpu_memory_secondary': None,
         'cpu_memory': None,          # type=string , same as above in GiB or MiB
-        'disk': True,                # toggle for offloading remaining model layers to disk if model is too big -> creates disk cache on env creation and wipes it on termination
+        'disk': False,                # toggle for offloading remaining model layers to disk if model is too big -> creates disk cache on env creation and wipes it on termination
         'disk_cache_dir': 'cache',   # type=string , defaults to cache directory
         'load_in_8bit': False,       # toggle for 8-bit precision using BitsandBytes 
         'bf16': False,               # toggle for bloat16 precision, NVIDIA Ampere GPU required
