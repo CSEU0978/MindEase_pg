@@ -55,13 +55,21 @@ def list_model_setting_elements(chat=True):
 
 
 def list_interface_input_elements(chat=True):
-    elements = []
+    if chat:
+        elements = ['max_new_tokens', 'seed', 'temperature', 'top_p', 'top_k', 'typical_p', 'epsilon_cutoff', 'eta_cutoff',
+                    'repetition_penalty', 'encoder_repetition_penalty', 'no_repeat_ngram_size', 'min_length', 'do_sample',
+                    'penalty_alpha', 'num_beams', 'length_penalty', 'early_stopping', 'mirostat_mode', 'mirostat_tau', 'mirostat_eta',
+                    'add_bos_token', 'ban_eos_token', 'truncation_length', 'custom_stopping_strings', 'skip_special_tokens',
+                    'preset_menu', 'stream', 'tfs', 'top_a', 'name1', 'name2', 'greeting', 'context', 'chat_prompt_size',
+                    'chat_generation_attempts', 'stop_at_newline', 'mode', 'instruction_template', 'character_menu', 'name1_instruct',
+                    'name2_instruct', 'context_instruct', 'turn_template', 'chat_style', 'chat-instruct_command']
+
     return elements
 
 
 def gather_interface_values(*args: object) -> object:
     output = {}
-    for i, element in enumerate(shared.generate_params):
+    for i, element in enumerate(shared.input_elements):
         output[element] = args[i]
 
     shared.persistent_interface_state = output

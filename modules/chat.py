@@ -330,7 +330,10 @@ def generate_chat_reply(text, history, state, regenerate=False, _continue=False,
 
 # Same as above but returns HTML for the UI
 def generate_chat_reply_wrapper(text, start_with, state, regenerate=False, _continue=False):
-    if start_with != '' and _continue is False:
+    if start_with != '' and not _continue:
+        if regenerate:
+            text, state['history'] = remove_last_message()
+
         _continue = True
         send_dummy_message(text)
         send_dummy_reply(start_with)

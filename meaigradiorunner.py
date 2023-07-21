@@ -3,6 +3,7 @@ import warnings
 
 import requests
 
+import modules.text_generation
 from modules.logging_colors import logger
 
 os.environ['GRADIO_ANALYTICS_ENABLED'] = 'True'
@@ -49,9 +50,7 @@ from modules.extensions import apply_extensions
 from modules.html_generator import chat_html_wrapper
 from modules.LoRA import add_lora_to_model
 from modules.models import load_model  # load_soft_prompt, unload_model
-from modules.text_generation import (  # generate_reply_wrapper,
-    get_encoded_length,
-    stop_everything_event)
+from modules.text_generation import (generate_reply_wrapper, get_encoded_length, stop_everything_event)
 
 # Torch Cuda Sanity checks 
 if torch.cuda.is_available:
@@ -210,6 +209,12 @@ def settings_menu(state, default_preset):
 '''
 
 # function to set interface mode
+
+
+# START OF GRADIO INTEGRATION
+# '''
+
+
 # removed def set_interface_arguments(interface_mode, extensions, bool_active):
 
 # extensive modification done to def create_interface(): refer to source code
@@ -245,8 +250,8 @@ def create_interface():
     js += apply_extensions('js')
 
     # Gradio Array to prevent KeyErrors
-    for k in shared.settings:
-        shared.gradio[k] = shared.settings[k]
+    #for k in shared.settings:
+    #    shared.gradio[k] = shared.settings[k]
 
     # removed generate_params = load_preset_values(default_preset if not shared.args['flexgen'] else 'Naive' , return_dict=True)
 
@@ -261,34 +266,85 @@ def create_interface():
         # Create chat mode interface
         if shared.is_chat():
 
-            #shared.input_elements = ui.list_interface_input_elements(chat=True)
+            shared.input_elements = ui.list_interface_input_elements(chat=True)
 
-            '''shared.input_elements = shared.args | shared.settings
-            removals = {'notebook', 'chat', 'chat_style_dir', 'character', 'model_dir', 'lora_dir', 'lora',
-                        'model_menu', 'no_stream', 'settings_file', 'gpu_memory_secondary', 'no_cache', 'cache_capacity',
+            shared.input_elements = shared.args | shared.settings
+            removals = {'notebook', 'chat', 'chat_style_dir', 'character', 'model_dir', 'lora_dir', 'lora', 'auto_devices', 'gpu_memory',
+                        'model_menu', 'no_stream', 'settings_file', 'gpu_memory_secondary', 'no_cache', 'cache_capacity', 'cpu_memory',
                         'gptq_loader_dir', 'quant_attn', 'warmup_attn', 'fused_mlp', 'flexgen', 'percent', 'compress_weight', 'pin_weight', 'listen',
-                        'listen_port', 'share', 'auto_launch', 'gradio_auth', 'gradio_auth_path', 'api', 'api_blocking_port',
+                        'listen_port', 'share', 'auto_launch', 'gradio_auth', 'gradio_auth_path', 'api', 'api_blocking_port', 'cpu', 'disk',
                         'api_streaming_port', 'public_api', 'dark_theme', 'autoload_model', 'max_new_tokens_min', 'max_new_tokens_max',
-                        'truncation_length_max', 'chat_prompt_size_min', 'chat_prompt_size_max', 'chat_generation_attempts_max',
-                        'chat_generation_attempts_min', 'default_extensions', 'chat_default_extensions', 'preset', 'prompt', 'initial'} #'cache', 'starts_with', 'extensions'
+                        'truncation_length_max', 'chat_prompt_size_min', 'chat_prompt_size_max', 'chat_generation_attempts_max', 'verbose',
+                        'chat_generation_attempts_min', 'default_extensions', 'chat_default_extensions', 'preset', 'prompt', 'initial', 'extensions'} #'cache', 'starts_with', 'extensions'
             for k in removals:
                 shared.input_elements.pop(k)
-            '''
+            
             shared.gradio['interface_state'] = gr.State({k: None for k in shared.input_elements})
             shared.gradio['Chat input'] = gr.State()
-            # shared.gradio['dummy'] = gr.State()
+            shared.gradio['dummy'] = gr.State()
+            shared.gradio['mode'] = gr.State(value=shared.settings['mode'])
+
+            shared.gradio['seed'] = gr.State(value=shared.settings['seed'])
+            shared.gradio['temperature'] = gr.State(value=shared.generate_params['temperature'])
+            shared.gradio['top_p'] = gr.State(value=shared.generate_params['top_p'])
+            shared.gradio['top_k'] = gr.State(value=shared.generate_params['top_k'])
+            shared.gradio['typical_p'] = gr.State(value=shared.generate_params['typical_p'])
+            shared.gradio['epsilon_cutoff'] = gr.State(value=shared.generate_params['epsilon_cutoff'])
+            shared.gradio['eta_cutoff'] = gr.State(value=shared.generate_params['eta_cutoff'])
+            shared.gradio['tfs'] = gr.State(value=shared.generate_params['tfs'])
+            shared.gradio['top_a'] = gr.State(value=shared.generate_params['top_a'])
+
+            shared.gradio['repetition_penalty'] = gr.State(value=shared.generate_params['repetition_penalty'])
+            shared.gradio['encoder_repetition_penalty'] = gr.State(value=shared.generate_params['encoder_repetition_penalty'])
+            shared.gradio['no_repeat_ngram_size'] = gr.State(value=shared.generate_params['no_repeat_ngram_size'])
+            shared.gradio['min_length'] = gr.State(value=shared.generate_params['min_length'])
+            shared.gradio['do_sample'] = gr.State(value=shared.generate_params['do_sample'])
+
+            # Contrastive Search
+            shared.gradio['penalty_alpha'] = gr.State(value=shared.generate_params['penalty_alpha'])
+
+            # Beam Search
+            shared.gradio['num_beams'] = gr.State(value=shared.generate_params['num_beams'])
+            shared.gradio['length_penalty'] = gr.State(value=shared.generate_params['length_penalty'])
+            shared.gradio['early_stopping'] = gr.State(value=shared.generate_params['early_stopping'])
+
+            # Mirostat for llama.cpp
+            shared.gradio['mirostat_mode'] = gr.State(value=shared.generate_params['mirostat_mode'])
+            shared.gradio['mirostat_tau'] = gr.State(value=shared.generate_params['mirostat_tau'])
+            shared.gradio['mirostat_eta'] = gr.State(value=shared.generate_params['mirostat_eta'])
+
+            # Other
+            shared.gradio['truncation_length'] = gr.State(value=shared.settings['truncation_length'])
+            shared.gradio['custom_stopping_strings'] = gr.State(value=shared.settings['custom_stopping_strings'])
+
+            shared.gradio['ban_eos_token'] = gr.State(value=shared.settings['ban_eos_token'])
+            shared.gradio['add_bos_token'] = gr.State(value=shared.settings['add_bos_token'])
+            shared.gradio['skip_special_tokens'] = gr.State(value=shared.settings['skip_special_tokens'])
+
+            shared.gradio['stream'] = gr.State({'stream': True})
+
+            # Parameters
+            shared.gradio['max_new_tokens'] = gr.State(value=shared.settings['max_new_tokens'], elem_id="parameters")
+            shared.gradio['chat_prompt_size'] = gr.State(value=shared.settings['chat_prompt_size'], elem_id="parameters")
+            shared.gradio['chat_generation_attempts'] = gr.State(value=shared.settings['chat_generation_attempts'], elem_id="parameters")
+            shared.gradio['stop_at_newline'] = gr.State(value=shared.settings['stop_at_newline'], elem_id="parameters")
+
+            # Chat settings
+            shared.gradio['name1'] = gr.State(value=shared.settings['name1'], elem_id="chat-settings")
+            shared.gradio['name2'] = gr.State(value=shared.settings['name2'], elem_id="chat-settings")
+            shared.gradio['context'] = gr.State(value=shared.settings['context'], elem_id="chat-settings")
+            shared.gradio['greeting'] = gr.State(value=shared.settings['greeting'], elem_id="chat-settings")
 
             with gr.Tab('Text generation', elem_id='main'):
-                shared.gradio['display'] = gr.HTML(
-                    value=chat_html_wrapper(shared.history['visible'], shared.gradio['name1'], shared.gradio['name2'],
-                                            shared.gradio['mode'], shared.gradio['chat_style']))
+                shared.gradio['display'] = gr.HTML(value=chat_html_wrapper(shared.history['visible'], shared.settings['name1'], shared.settings['name2'], shared.gradio['mode'], shared.gradio['chat_style']))
 
-                shared.gradio['textbox'] = gr.Textbox(label='Input', elem_id='textbox')
+                shared.gradio['textbox'] = gr.Textbox(label='Input')  #elem_id = 'textbox'
 
                 with gr.Row():
                     shared.gradio['Stop'] = gr.Button('Stop', elem_id='stop')
                     shared.gradio['Generate'] = gr.Button('Generate', elem_id='Generate', variant='primary')
                     shared.gradio['Continue'] = gr.Button('Continue')
+                    shared.gradio['Regenerate'] = gr.Button('Regenerate')
 
                 # removed 2 gr.row() for impersonate, regenerate, remove last,
                 # removed copy last reply, replace last reply, dummy message, dummy reply, 
@@ -312,60 +368,42 @@ def create_interface():
                 # removed Training tab
                 # removed Interface mode tab
         with gr.Tab("Interface mode", elem_id="interface-mode"):
-            modes = ["chat"]
-            current_mode = "chat"
-            for mode in modes[1:]:
-                if getattr(shared.args, mode):
-                    current_mode = mode
-                    break
 
-            cmd_list = shared.args
-            bool_list = sorted(
-                [k for k in cmd_list if type(cmd_list[k]) is bool and k not in modes + ui.list_model_elements()])
-            bool_active = [k for k in bool_list if shared.args[k]]
-
-            with gr.Row():
-                shared.gradio['interface_modes_menu'] = gr.Dropdown(choices=modes, value=current_mode, label="Mode")
-                shared.gradio['toggle_dark_mode'] = gr.Button('Toggle dark/light mode', elem_classes="small-button")
-
-            shared.gradio['bool_menu'] = gr.CheckboxGroup(choices=bool_list, value=bool_active,
-                                                          label="Boolean command-line flags")
             shared.gradio['reset_interface'] = gr.Button("Apply and restart the interface")
 
         # chat mode event handlers
         if shared.is_chat():
-            shared.input_params = [shared.gradio[k] for k in ['Chat input', 'start_with', 'interface_state']]
+            shared.input_params = [shared.gradio[k] for k in ['Chat input','interface_state']]
+            shared.input_params += shared.settings['start_with']
             clear_arr = [shared.gradio[k] for k in ['Clear history-confirm', 'Clear history', 'Clear history-cancel']]
-            shared.reload_inputs = [shared.gradio[k] for k in ['name1', 'name2', 'mode', 'chat_style']]
-
-            def function(x):
-                return (x, '')
+            shared.reload_inputs = [shared.settings[k] for k in ['name1', 'name2', 'mode', 'chat_style']]
 
             gen_events.append(shared.gradio['Generate'].click(
-                print("shared.gradio from gen_events_append generate", shared.gradio),
-                shared.gradio['interface_state']).then(
-                function, shared.gradio['textbox'], [shared.gradio['Chat input'], shared.gradio['textbox']], show_progress=False).then(
-                chat.generate_chat_reply_wrapper, shared.input_params, shared.gradio['display'], show_progress=False).then(
+                ui.gather_interface_values, [shared.gradio[k] for k in shared.input_elements], shared.gradio['interface_state']).then(
+                lambda x: (x, ''), shared.gradio['textbox'], [shared.gradio['Chat input'], shared.gradio['textbox']], show_progress=False).then(
+                chat.generate_chat_reply, shared.input_params, shared.gradio['display'], show_progress=False).then(
                 chat.save_history, shared.gradio['mode'], None, show_progress=False).then(
                 lambda: None, None, None, _js=f"() => {{{audio_notification_js}}}")
             )
 
             gen_events.append(shared.gradio['textbox'].submit(
-                shared.gradio['interface_state']).then(
-                lambda x: (x, ''), shared.gradio['textbox'], [shared.gradio['Chat input'], shared.gradio['textbox']],
-                show_progress=False).then(
-                chat.generate_chat_reply_wrapper, shared.input_params, shared.gradio['display'],
-                show_progress=False).then(
+                ui.gather_interface_values, [shared.gradio[k] for k in shared.input_elements],shared.gradio['interface_state']).then(
+                lambda x: (x, ''), shared.gradio['textbox'], [shared.gradio['Chat input'], shared.gradio['textbox']], show_progress=False).then(
+                chat.generate_chat_reply, shared.input_params, shared.gradio['display'], show_progress=False).then(
                 chat.save_history, shared.gradio['mode'], None, show_progress=False).then(
                 lambda: None, None, None, _js=f"() => {{{audio_notification_js}}}")
             )
 
-            # removed gen_events.append(shared.gradio['Regenerate'].click()
+            gen_events.append(shared.gradio['Regenerate'].click(
+                ui.gather_interface_values, [shared.gradio[k] for k in shared.input_elements], shared.gradio['interface_state']).then(
+                partial(chat.generate_chat_reply_wrapper, regenerate=True), shared.input_params, shared.gradio['display'], show_progress=False).then(
+                chat.save_history, shared.gradio['mode'], None, show_progress=False).then(
+                lambda: None, None, None, _js=f"() => {{{audio_notification_js}}}")
+            )
 
             gen_events.append(shared.gradio['Continue'].click(
-                shared.gradio['interface_state']).then(
-                partial(chat.generate_chat_reply_wrapper, _continue=True), shared.input_params,
-                shared.gradio['display'], show_progress=False).then(
+                ui.gather_interface_values(), [shared.gradio[k] for k in shared.input_elements], shared.gradio['interface_state']).then(
+                partial(chat.generate_chat_reply, _continue=True), shared.input_params, shared.gradio['display'], show_progress=False).then(
                 chat.save_history, shared.gradio['mode'], None, show_progress=False).then(
                 lambda: None, None, None, _js=f"() => {{{audio_notification_js}}}")
             )
@@ -427,6 +465,12 @@ def create_interface():
         shared.gradio['interface'].launch(prevent_thread_lock=True, share=shared.args['share'],
                                           server_port=shared.args['listen_port'], inbrowser=shared.args['auto_launch'],
                                           auth=auth)
+
+
+
+# '''
+# END OF GRADIO UI INTEGRATION
+
 
 
 if __name__ == "__main__":
@@ -503,11 +547,22 @@ if __name__ == "__main__":
 
     # removed if shared.is_chat(): Force a character to be loaded
     if shared.is_chat():
-        shared.persistent_interface_state.update({'mode':shared.settings['mode']})
+        shared.persistent_interface_state.update({'mode': shared.settings['mode'], 'instruction_template': shared.settings['instruction_template']})
 
     shared.generation_lock = Lock()
+
+
+def create_demo():
+    while True:
+        userinput = input('test test')
+        result = modules.text_generation.generate_reply_HF(userinput)
+        return result
+
+
+create_demo()
+
     # Launch the web UI
-    create_interface()
+    #create_interface()
 ''' # removed restart interface
     while True:
         time.sleep(0.5)
