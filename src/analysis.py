@@ -105,7 +105,7 @@ def inputAnalysis(inputDataText):
             emotionList[3] : scoresList[3],
             emotionList[4] : scoresList[4],
             emotionList[5] : scoresList[5],
-            "Emotion" : maxEmotion
+            "Emotion": maxEmotion
         }
     )
 
